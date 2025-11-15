@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <meta name="msapplication-TileImage" content="item/favicon-96x96.png">
-    <title>NullLynx | The Cyber Expert</title>
+    <title>nulllynx | Asanul Hoque Esan Portfolio</title>
     
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -55,9 +54,44 @@
             animation: blink 0.8s step-end infinite;
         }
 
-        /* Custom Transition for Active Nav Underline (simplified) */
+        /* Smooth transition for position and size of the underline */
         .nav-underline {
-            transition: width 0.3s ease, left 0.3s ease, background-color 0.3s ease;
+            transition: width 0.3s ease, left 0.3s ease, opacity 0.3s ease;
+        }
+
+        /* --- NEW HACKER LOADER STYLES --- */
+        @keyframes matrix-glitch {
+            0% { text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4; }
+            50% { text-shadow: 0 0 8px #10b981, 0 0 15px #10b981; }
+            100% { text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4; }
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+
+        @keyframes terminal-cursor {
+            50% { border-color: transparent; }
+        }
+
+        .hacker-text {
+            color: #10b981; /* Emerald Green */
+            font-family: 'monospace', monospace;
+            animation: matrix-glitch 1.5s infinite alternate;
+        }
+
+        .terminal-type {
+            overflow: hidden; /* Ensures the typing animation works */
+            white-space: nowrap;
+            width: 0;
+            animation: typing 2.5s steps(40, end) forwards;
+        }
+        
+        .terminal-bar {
+            width: 0;
+            animation: typing 2.5s steps(40, end) forwards;
+            background-color: #06b6d4; /* Teal */
         }
     </style>
 </head>
@@ -261,6 +295,62 @@ const useCountUp = (endValue) => {
     return count;
 };
 
+// --- NEW HACKER LOADER COMPONENT ---
+const HackerLoader = ({ onLoaded }) => {
+    // Manually control the visibility
+    const [isVisible, setIsVisible] = useState(true);
+
+    useEffect(() => {
+        // Hide the loader after 4 seconds (after animation completes)
+        const timer = setTimeout(() => {
+            setIsVisible(false);
+            onLoaded();
+        }, 4000); 
+
+        return () => clearTimeout(timer);
+    }, [onLoaded]);
+
+    if (!isVisible) return null;
+
+    return (
+        <div 
+            className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center z-[100] transition-opacity duration-500"
+            style={{ opacity: isVisible ? 1 : 0 }}
+        >
+            <div className="w-4/5 max-w-lg p-6 bg-gray-900 border-2 border-teal-500 shadow-xl shadow-teal-900/50 rounded-lg">
+                <p className="hacker-text text-xl mb-3">$ Initializing Security Protocol...</p>
+                
+                <div className="h-6 mb-4 bg-gray-800 border border-teal-500/50 rounded overflow-hidden">
+                    {/* Progress Bar Animation */}
+                    <div 
+                        className="h-full terminal-bar" 
+                        style={{ animationDuration: '3.5s', backgroundColor: '#06b6d4' }}
+                    ></div>
+                </div>
+
+                <div className="hacker-text text-sm mb-3">
+                    <span 
+                        className="terminal-type" 
+                        style={{ animationDuration: '3.0s', animationDelay: '0.5s' }}
+                    >
+                        > Authenticating User: Asanul Hoque Esan... OK
+                    </span>
+                    <br />
+                    <span 
+                        className="terminal-type" 
+                        style={{ animationDuration: '3.5s', animationDelay: '1.5s' }}
+                    >
+                        > Loading Portfolio Data [256MB]... Complete
+                    </span>
+                </div>
+                
+                <p className="hacker-text text-lg text-teal-400 mt-4">$ Access Granted | Welcome Back.</p>
+            </div>
+        </div>
+    );
+};
+
+
 // 1. STATUS Section
 const StatusSection = () => {
     const [displayedRole, setDisplayedRole] = useState('');
@@ -373,7 +463,7 @@ const ProfileSection = () => {
                     >
                         <div className="w-64 h-64 rounded-full overflow-hidden shadow-2xl border-4 border-blue-500/50 transition-all duration-800">
                             <img
-                                src="item/WhatsApp Image 2025-11-15 at 19.00.03_5a92564e.jpg"
+                                src=" item/WhatsApp Image 2025-11-15 at 19.00.03_5a92564e.jpg"
                                 alt="Asanul Hoque Esan Profile"
                                 className="w-full h-full object-cover"
                             />
@@ -1001,36 +1091,64 @@ const App = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [theme, setTheme] = useState('dark');
     const [activeSection, setActiveSection] = useState(NAV_ITEMS[0]);
-    
-    // --- Scroll Logic ---
-    useEffect(() => {
-        const handleScroll = () => {
-            let currentSectionId = NAV_ITEMS[0];
-            const offset = 90;
+    const [underlineStyle, setUnderlineStyle] = useState({ width: 0, left: 0, opacity: 0 });
+    const [isLoaded, setIsLoaded] = useState(false); // New state for loading control
 
-            for (const item of NAV_ITEMS) {
-                const section = document.getElementById(item);
-                if (section) {
-                    const rect = section.getBoundingClientRect();
-                    if (rect.top <= offset + 10 && rect.bottom > offset) {
-                        currentSectionId = item;
-                        break;
-                    }
+    
+    // --- Scroll & Measurement Logic (Updated) ---
+    const updateUnderlineAndActiveSection = useCallback(() => {
+        if (!isLoaded) return; // Prevent calculations before content is ready
+
+        let currentSectionId = NAV_ITEMS[0];
+        const offset = 90; // Header height offset
+
+        // 1. Determine active section (Scroll Logic)
+        for (const item of NAV_ITEMS) {
+            const section = document.getElementById(item);
+            if (section) {
+                const rect = section.getBoundingClientRect();
+                if (rect.top <= offset + 10 && rect.bottom > offset) {
+                    currentSectionId = item;
+                    break;
                 }
             }
-            setActiveSection(currentSectionId);
-        };
+        }
+        setActiveSection(currentSectionId);
 
-        const timeout = setTimeout(() => {
-            window.addEventListener('scroll', handleScroll);
-            handleScroll();
-        }, 100);
+        // 2. Measure and position underline (New Logic)
+        const activeLink = document.querySelector(`.nav-link[href="#${currentSectionId}"]`);
+        if (activeLink) {
+            const parent = activeLink.closest('.nav-container');
+            const parentLeft = parent ? parent.getBoundingClientRect().left : 0;
+            const linkLeft = activeLink.getBoundingClientRect().left;
+            
+            setUnderlineStyle({
+                width: activeLink.offsetWidth,
+                left: linkLeft - parentLeft,
+                opacity: 1,
+            });
+        } else {
+             setUnderlineStyle({ width: 0, left: 0, opacity: 0 });
+        }
+    }, [isLoaded]);
 
-        return () => {
-            clearTimeout(timeout);
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, []);
+
+    useEffect(() => {
+        if (isLoaded) {
+            window.addEventListener('scroll', updateUnderlineAndActiveSection);
+            window.addEventListener('resize', updateUnderlineAndActiveSection);
+            
+            // Initial check immediately after loading
+            const timeout = setTimeout(updateUnderlineAndActiveSection, 50);
+
+            return () => {
+                clearTimeout(timeout);
+                window.removeEventListener('scroll', updateUnderlineAndActiveSection);
+                window.removeEventListener('resize', updateUnderlineAndActiveSection);
+            };
+        }
+    }, [isLoaded, updateUnderlineAndActiveSection]);
+
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
     const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
@@ -1040,8 +1158,8 @@ const App = () => {
         setIsMenuOpen(false);
     };
 
-    // Header component updated to receive activeSection
-    const Header = ({ activeSection }) => (
+    // Header component updated to receive underlineStyle
+    const Header = ({ activeSection, underlineStyle }) => (
         <header className="fixed top-0 left-0 right-0 z-40 bg-gray-900/95 backdrop-blur-sm shadow-xl transition-all duration-300">
             <div className="container mx-auto px-6 py-4 flex justify-between items-center">
                 <a href="#STATUS" onClick={() => scrollToSection('STATUS')} className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500">
@@ -1049,19 +1167,25 @@ const App = () => {
                 </a>
 
                 {/* Desktop Navigation */}
-                <nav className="hidden lg:flex items-center space-x-6">
+                <nav className="hidden lg:flex items-center space-x-6 relative nav-container"> {/* Added nav-container for reference */}
+                    {/* Dynamic Underline Element (New Implementation) */}
+                    <div
+                        className="absolute bottom-[-5px] h-[2px] bg-teal-400 rounded-full nav-underline"
+                        style={{
+                            width: `${underlineStyle.width}px`,
+                            left: `${underlineStyle.left}px`,
+                            opacity: underlineStyle.opacity,
+                        }}
+                    />
+
                     {NAV_ITEMS.map(item => (
                         <a
                             key={item}
                             href={`#${item}`}
                             onClick={() => scrollToSection(item)}
-                            className={`relative font-medium transition-colors duration-200 uppercase tracking-wider text-sm ${activeSection === item ? 'text-teal-400' : 'text-gray-300 hover:text-teal-400'}`}
+                            className={`nav-link relative font-medium transition-colors duration-200 uppercase tracking-wider text-sm ${activeSection === item ? 'text-teal-400' : 'text-gray-300 hover:text-teal-400'}`}
                         >
                             {item.replace(/_/g, ' ')}
-                            {/* Active highlight/underline using CSS transition */}
-                            <div
-                                className={`absolute bottom-[-5px] left-0 right-0 h-[2px] bg-teal-400 rounded-full nav-underline ${activeSection === item ? 'w-full' : 'w-0'}`}
-                            />
                         </a>
                     ))}
                     <button onClick={toggleTheme} className="p-2 rounded-full text-gray-300 hover:text-teal-400 transition-colors">
@@ -1127,70 +1251,75 @@ const App = () => {
 
     return (
         <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} font-sans antialiased scroll-smooth`}>
-            <Header activeSection={activeSection} />
-            <main>
-                <StatusSection />
-                <ProfileSection />
-                <AnalysisSection />
-                <AccomplishSection />
-                <DocumentsSection />
-                <AccessLogSection />
-                <EncryptDecryptSection />
-            </main>
-            {/* FOOTER: Contact Section Integration */}
-            <footer className="bg-gray-950 border-t border-gray-800 py-12">
-                <div className="container mx-auto px-6">
-                    <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0">
-                        {/* Left: Branding & Copyright */}
-                        <div className="text-center md:text-left">
-                            <a href="#STATUS" onClick={() => scrollToSection('STATUS')} className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500 mb-2 block">
-                                nulllynx
-                            </a>
-                            <p className="text-gray-500 text-sm mt-2">&copy; {new Date().getFullYear()} Asanul Hoque Esan.</p>
-                            <p className="text-gray-500 text-xs">Security Portfolio. Crafted with React & CSS.</p>
-                        </div>
+            {/* The Hacker Loader */}
+            <HackerLoader onLoaded={() => setIsLoaded(true)} />
 
-                        {/* Right: Get In Touch / Contact Options (Updated) */}
-                        <div className="w-full md:w-auto">
-                            <h4 className="text-2xl font-semibold text-white mb-6 border-b-2 border-teal-500 inline-block pb-1 mx-auto md:mx-0">
-                                Get In Touch
-                            </h4>
-                            <div className="flex flex-col sm:flex-row gap-8 justify-center md:justify-end">
-                                
-                                {/* Left Side: 2 Email Links */}
-                                <div className="space-y-4 w-full sm:w-56 flex-shrink-0">
-                                    <h5 className="text-lg font-medium text-gray-300 border-b border-gray-700 pb-1">Direct Mail</h5>
-                                    {emailLinks.map((item, index) => (
-                                        <MailLink key={index} {...item} />
-                                    ))}
-                                </div>
+            <div style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.5s' }}>
+                <Header activeSection={activeSection} underlineStyle={underlineStyle} />
+                <main>
+                    <StatusSection />
+                    <ProfileSection />
+                    <AnalysisSection />
+                    <AccomplishSection />
+                    <DocumentsSection />
+                    <AccessLogSection />
+                    <EncryptDecryptSection />
+                </main>
+                {/* FOOTER: Contact Section Integration */}
+                <footer className="bg-gray-950 border-t border-gray-800 py-12">
+                    <div className="container mx-auto px-6">
+                        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0">
+                            {/* Left: Branding & Copyright */}
+                            <div className="text-center md:text-left">
+                                <a href="#STATUS" onClick={() => scrollToSection('STATUS')} className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500 mb-2 block">
+                                    nulllynx
+                                </a>
+                                <p className="text-gray-500 text-sm mt-2">&copy; {new Date().getFullYear()} Asanul Hoque Esan.</p>
+                                <p className="text-gray-500 text-xs">Security Portfolio. Crafted with React & CSS.</p>
+                            </div>
 
-                                {/* Right Side: 8 Social/Platform Links */}
-                                <div className="w-full sm:w-auto">
-                                    <h5 className="text-lg font-medium text-gray-300 border-b border-gray-700 pb-1 mb-4">Platforms & Socials ({otherLinks.length})</h5>
-                                    <div className="grid grid-cols-4 gap-x-4 gap-y-6 justify-center">
-                                        {otherLinks.map((item, index) => (
-                                            <a
-                                                key={index}
-                                                href={item.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="text-gray-400 transition-transform duration-200 flex flex-col items-center group hover:scale-[1.25] active:scale-[0.9]"
-                                                title={item.name}
-                                            >
-                                                {/* Icon with inline style for color property */}
-                                                <IconWrapper icon={item.icon} color={item.color} />
-                                                {/* Name for accessibility/context on hover */}
-                                                <span className="mt-1 text-xs text-gray-500 group-hover:text-teal-400 hidden sm:block">{item.name.split(' ')[0]}</span>
-                                            </a>
+                            {/* Right: Get In Touch / Contact Options (Updated) */}
+                            <div className="w-full md:w-auto">
+                                <h4 className="text-2xl font-semibold text-white mb-6 border-b-2 border-teal-500 inline-block pb-1 mx-auto md:mx-0">
+                                    Get In Touch
+                                </h4>
+                                <div className="flex flex-col sm:flex-row gap-8 justify-center md:justify-end">
+                                    
+                                    {/* Left Side: 2 Email Links */}
+                                    <div className="space-y-4 w-full sm:w-56 flex-shrink-0">
+                                        <h5 className="text-lg font-medium text-gray-300 border-b border-gray-700 pb-1">Direct Mail</h5>
+                                        {emailLinks.map((item, index) => (
+                                            <MailLink key={index} {...item} />
                                         ))}
+                                    </div>
+
+                                    {/* Right Side: 8 Social/Platform Links */}
+                                    <div className="w-full sm:w-auto">
+                                        <h5 className="text-lg font-medium text-gray-300 border-b border-gray-700 pb-1 mb-4">Platforms & Socials ({otherLinks.length})</h5>
+                                        <div className="grid grid-cols-4 gap-x-4 gap-y-6 justify-center">
+                                            {otherLinks.map((item, index) => (
+                                                <a
+                                                    key={index}
+                                                    href={item.link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="text-gray-400 transition-transform duration-200 flex flex-col items-center group hover:scale-[1.25] active:scale-[0.9]"
+                                                    title={item.name}
+                                                >
+                                                    {/* Icon with inline style for color property */}
+                                                    <IconWrapper icon={item.icon} color={item.color} />
+                                                    {/* Name for accessibility/context on hover */}
+                                                    <span className="mt-1 text-xs text-gray-500 group-hover:text-teal-400 hidden sm:block">{item.name.split(' ')[0]}</span>
+                                                </a>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </footer>
+                </footer>
+            </div>
         </div>
     );
 };
@@ -1199,6 +1328,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(<App />);
 </script>
 
 </body>
-
 </html>
-
