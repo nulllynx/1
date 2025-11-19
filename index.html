@@ -1,1332 +1,1574 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NullLynx | Asanul Hoque Esan Portfolio</title>
+    <title>Asanul Hoque Esan | Cybersecurity Portfolio</title>
     
-    <!-- Load Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Load React, ReactDOM, and Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    
-    <!-- Tailwind Configuration and Custom Styles -->
-    <style>
-        /* Global Smooth Scroll */
-        html { 
-            scroll-behavior: smooth; 
-            font-family: 'Inter', sans-serif;
-        }
-
-        /* Container Max Width for Ultra-wide screens */
-        .container { max-width: 1400px; }
-
-        /* Custom Keyframes for Continuous Scroll (RTL and LTR) */
-        @keyframes autoscroll-rtl {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); } 
-        }
-        .autoscroll-container-rtl {
-            animation: autoscroll-rtl 60s linear infinite; 
-            display: flex;
-            width: max-content; 
-        }
-
-        @keyframes autoscroll-ltr {
-            0% { transform: translateX(-50%); } 
-            100% { transform: translateX(0); }
-        }
-        .autoscroll-container-ltr {
-            animation: autoscroll-ltr 60s linear infinite; 
-            display: flex;
-            width: max-content;
-        }
-
-        /* Custom Keyframes for Typing Cursor Blink */
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-        .typing-cursor {
-            animation: blink 0.8s step-end infinite;
-        }
-
-        /* Smooth transition for position and size of the underline */
-        .nav-underline {
-            transition: width 0.3s ease, left 0.3s ease, opacity 0.3s ease;
-        }
-
-        /* --- NEW HACKER LOADER STYLES --- */
-        @keyframes matrix-glitch {
-            0% { text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4; }
-            50% { text-shadow: 0 0 8px #10b981, 0 0 15px #10b981; }
-            100% { text-shadow: 0 0 5px #06b6d4, 0 0 10px #06b6d4; }
-        }
-        
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-
-        @keyframes terminal-cursor {
-            50% { border-color: transparent; }
-        }
-
-        .hacker-text {
-            color: #10b981; /* Emerald Green */
-            font-family: 'monospace', monospace;
-            animation: matrix-glitch 1.5s infinite alternate;
-        }
-
-        .terminal-type {
-            overflow: hidden; /* Ensures the typing animation works */
-            white-space: nowrap;
-            width: 0;
-            animation: typing 2.5s steps(40, end) forwards;
-        }
-        
-        .terminal-bar {
-            width: 0;
-            animation: typing 2.5s steps(40, end) forwards;
-            background-color: #06b6d4; /* Teal */
-        }
-    </style>
-</head>
-<body class="bg-gray-900 antialiased">
-
-<div id="root">
-    <!-- React app will render here -->
-</div>
-
-<!-- React Application Script -->
-<script type="text/babel">
-const { useState, useEffect, useCallback, useMemo } = React;
-
-// Lucide Icons (Inline SVG replacement for complexity)
-const LucideIcons = {
-    Menu: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>,
-    X: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>,
-    Download: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>,
-    Zap: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>,
-    Shield: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>,
-    TrendingUp: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 10.5 12.5 5.5 17.5"></polyline><polyline points="18 7 22 7 22 11"></polyline></svg>,
-    ChevronDown: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>,
-    ChevronUp: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>,
-    CheckCircle: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="M9 11l3 3L22 4"></path></svg>,
-    ExternalLink: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" x2="21" y1="14" y2="3"></line></svg>,
-    Bug: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2h8M12 2v20M5 10v6M19 10v6M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6H3v6zM7 21v-2M17 21v-2M12 18V5M8 5H6V3M18 5h-2V3"></path></svg>,
-    Search: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" x2="16.65" y1="21" y2="16.65"></line></svg>,
-    Server: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"></rect><rect width="20" height="8" x="2" y="14" rx="2" ry="2"></rect><line x1="6" x2="6" y1="6" y2="6"></line><line x1="18" x2="18" y1="6" y2="6"></line><line x1="6" x2="6" y1="18" y2="18"></line><line x1="18" x2="18" y1="18" y2="18"></line></svg>,
-    Code: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>,
-    Lock: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>,
-    FileText: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M10 9H8"></path><path d="M16 13H8"></path><path d="M16 17H8"></path></svg>,
-    Heart: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path></svg>,
-    GitFork: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="18" r="3"></circle><path d="M12 15v-6"></path><circle cx="12" cy="6" r="3"></circle><path d="M18 6h-3M6 6h3"></path></svg>,
-    Mail: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>,
-    Linkedin: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>,
-    Github: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.67c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 3M19 12c.5-.5 1-1.2 1-2M6 12c-.5-.5-1-1.2-1-2"></path></svg>,
-    Twitter: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.5-18 11.5 1.3 2 4 4 8 4s7-2 9-5c1.4-1.4 2-3.1 2-5.5 0-.5 0-1-.1-1.5C20.6 6 21.6 4.6 22 4z"></path></svg>,
-    MessageSquare: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>,
-    Send: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>,
-    Trophy: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 21a10 10 0 0 0 10-10V3H2v8a10 10 0 0 0 10 10z"></path><path d="M8 12h8"></path><path d="M8 7h8"></path><path d="M12 15V3"></path><path d="M15 15h2l-2 4h-2l-2-4h2"></path></svg>,
-    Activity: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
-    Gauge: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 15V9"></path><path d="M12 9a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"></path><path d="M12 3v2"></path><path d="M4.93 4.93l1.41 1.41"></path><path d="M2 12h2"></path><path d="M4.93 19.07l1.41-1.41"></path><path d="M19.07 4.93l-1.41 1.41"></path><path d="M22 12h-2"></path><path d="M19.07 19.07l-1.41-1.41"></path></svg>,
-    Sun: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m4.93 19.07 1.41-1.41"></path><path d="m17.66 6.34 1.41-1.41"></path></svg>,
-    Moon: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>,
-    User: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>,
-    // Copy Icon (Simplified)
-    Copy: (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>,
-};
-
-// --- DATA DEFINITIONS ---
-const NAV_ITEMS = ["STATUS", "PROFILE", "ANALYSIS", "ACCOMPLISH", "DOCUMENTS", "ACCESS_LOG", "ENCRYPT"];
-const INITIAL_VISIBLE_PLATFORMS = 4;
-
-const TYPING_ROLES = [
-    "Hacker",
-    "Bug Bounty Hunter",
-    "CTF Player",
-    "Pentester",
-    "Security Researcher",
-    "Critical Thinker"
-];
-
-const STATS_DATA = [
-    { label: "Vulnerabilities Found", endValue: 500, suffix: "+", icon: LucideIcons.Zap },
-    { label: "Clients Secured", endValue: 25, suffix: "", icon: LucideIcons.Shield },
-    { label: "Success Rate", endValue: 98, suffix: "%", icon: LucideIcons.TrendingUp },
-];
-
-const TOOLS_DATA = [
-    { name: "Burp Suite Pro", level: 5, desc: "Leading web application security testing platform.", icon: LucideIcons.Bug },
-    { name: "Metasploit", level: 4, desc: "Exploitation framework for vulnerability development and execution.", icon: LucideIcons.Server },
-    { name: "Nmap", level: 5, desc: "Network discovery and security auditing tool.", icon: LucideIcons.Search },
-    { name: "Wireshark", level: 4, desc: "Network protocol analyzer for traffic inspection.", icon: LucideIcons.GitFork },
-    { name: "Ghidra", level: 3, desc: "Reverse engineering tool suite (NSA-developed).", icon: LucideIcons.Code },
-    { name: "Docker", level: 4, desc: "Containerization platform for isolated testing environments.", icon: LucideIcons.Code },
-    { name: "OWASP ZAP", level: 3, desc: "Free, open-source tool for finding vulnerabilities.", icon: LucideIcons.Bug },
-    { name: "SQLMap", level: 5, desc: "Automatic SQL injection and database takeover tool.", icon: LucideIcons.Server },
-    { name: "IDA Pro", level: 3, desc: "Binary analysis and disassembly tool.", icon: LucideIcons.Code },
-    { name: "Fuzzing Tools", level: 4, desc: "Custom scripts for input validation testing.", icon: LucideIcons.Zap },
-    { name: "KALI Linux", level: 5, desc: "A Linux distribution specialized for penetration testing.", icon: LucideIcons.Server },
-    { name: "Shodan", level: 4, desc: "Search engine for Internet-connected devices.", icon: LucideIcons.Search },
-    { name: "Maltego", level: 3, desc: "Graphical link analysis tool for data mining.", icon: LucideIcons.GitFork },
-    { name: "Aircrack-ng", level: 4, desc: "Wireless security auditing suite.", icon: LucideIcons.Code },
-    { name: "Sublime Text", level: 4, desc: "Code editor essential for payload creation and viewing.", icon: LucideIcons.FileText },
-    { name: "Hydra", level: 3, desc: "Fast parallelized login cracker.", icon: LucideIcons.Lock },
-    { name: "Gobuster", level: 4, desc: "Directory/file/DNS brute-forcing tool.", icon: LucideIcons.Search },
-    { name: "CouchPotato", level: 2, desc: "An automated movie downloading software.", icon: LucideIcons.Heart },
-    { name: "Hashcat", level: 5, desc: "Advanced password recovery utility.", icon: LucideIcons.Zap },
-    { name: "Autopsy", level: 3, desc: "Digital forensics platform.", icon: LucideIcons.Bug },
-];
-const combinedToolsData = [...TOOLS_DATA, ...TOOLS_DATA];
-
-const VULNS_DATA = [
-    { name: "SQL Injection (SQLi)", level: 5, desc: "Classic database exploitation vulnerability.", icon: LucideIcons.Server },
-    { name: "Cross-Site Scripting (XSS)", level: 5, desc: "Injecting malicious scripts into web pages.", icon: LucideIcons.Code },
-    { name: "Insecure Direct Object Reference (IDOR)", level: 4, desc: "Accessing unauthorized resources via parameter manipulation.", icon: LucideIcons.Shield },
-    { name: "Server-Side Request Forgery (SSRF)", level: 4, desc: "Tricking the server into making unexpected requests.", icon: LucideIcons.GitFork },
-    { name: "Authentication Flaws", level: 5, desc: "Bypassing login logic or token manipulation.", icon: LucideIcons.Lock },
-    { name: "XML External Entity (XXE)", level: 3, desc: "Exploiting XML parser processing of external entity references.", icon: LucideIcons.FileText },
-    { name: "Remote Code Execution (RCE)", level: 5, desc: "Executing arbitrary code on the host machine.", icon: LucideIcons.Zap },
-    { name: "Cross-Site Request Forgery (CSRF)", level: 3, desc: "Forcing victim users to execute unintended actions.", icon: LucideIcons.Bug },
-    { name: "Misconfiguration", level: 4, desc: "Exploiting improperly configured systems and services.", icon: LucideIcons.Server },
-    { name: "Logic Flaws", level: 5, desc: "Exploiting unique business logic errors.", icon: LucideIcons.Heart },
-    { name: "OAuth/JWT Misconfig", level: 4, desc: "Token validation or scope issues.", icon: LucideIcons.Lock },
-    { name: "CORS Misconfig", level: 3, desc: "Relaxed CORS headers allowing unauthorized requests.", icon: LucideIcons.GitFork },
-    { name: "Subdomain Takeover", level: 4, desc: "Claiming expired domains linked in DNS records.", icon: LucideIcons.Server },
-    { name: "Web Cache Deception", level: 3, desc: "Cache poisoning to leak sensitive user info.", icon: LucideIcons.Shield },
-    { name: "Prototype Pollution", level: 4, desc: "Injecting properties into JavaScript base objects.", icon: LucideIcons.Code },
-];
-const combinedVulnsData = [...VULNS_DATA, ...VULNS_DATA];
-
-const PLATFORMS_DATA = [
-    { name: "HackerOne", achievement: "Top 1% Rank", detail: "Ranked among the top 1% of researchers globally, consistently submitting high-impact reports.", logoUrl: "https://placehold.co/60x60/06B6D4/FFFFFF?text=H1", profileUrl: "#" },
-    { name: "Bugcrowd", achievement: "MVP Award 2023", detail: "Recognized as the Most Valuable Researcher in 2023 for significant platform contributions and volume of critical findings.", logoUrl: "https://placehold.co/60x60/EF4444/FFFFFF?text=BC", profileUrl: "#" },
-    { name: "Hack The Box", achievement: "Sensei Rank", detail: "Achieved the Sensei rank, demonstrating expert-level proficiency in penetration testing and machine exploitation.", logoUrl: "https://placehold.co/60x60/10B981/FFFFFF?text=HTB", profileUrl: "#" },
-    { name: "TryHackMe", achievement: "100% Completion", detail: "Completed all major learning paths and challenges, mastering defensive and offensive security concepts.", logoUrl: "https://placehold.co/60x60/6366F1/FFFFFF?text=THM", profileUrl: "#" },
-    { name: "PortSwigger", achievement: "Web Security Hero", detail: "Recognized as a Web Security Hero for consistently solving complex web security lab challenges.", logoUrl: "https://placehold.co/60x60/F97316/FFFFFF?text=PS", profileUrl: "#" },
-    { name: "Google VRP", achievement: "Hall of Fame", detail: "Inducted into the Google Vulnerability Rewards Program Hall of Fame for multiple critical vulnerability submissions.", logoUrl: "https://placehold.co/60x60/FACC15/000000?text=GV", profileUrl: "#" },
-    { name: "Microsoft", achievement: "Acknowledge", detail: "Received multiple acknowledgments for finding and responsibly disclosing security vulnerabilities in Microsoft products.", logoUrl: "https://placehold.co/60x60/3B82F6/FFFFFF?text=MS", profileUrl: "#" },
-    { name: "Facebook/Meta", achievement: "Special Thanks", detail: "Acknowledged by Meta's security team for contributions to the integrity and safety of their social media platforms.", logoUrl: "https://placehold.co/60x60/059669/FFFFFF?text=FB", profileUrl: "#" },
-    { name: "Synack", achievement: "Elite Red Team", detail: "Part of the exclusive Synack Red Team, trusted with highly sensitive penetration tests.", logoUrl: "https://placehold.co/60x60/EAB308/000000?text=SYN", profileUrl: "#" },
-    { name: "Cobalt", achievement: "Top Researcher", detail: "Consistently rated as a top-tier researcher on the Cobalt platform for speed and quality of findings.", logoUrl: "https://placehold.co/60x60/9333EA/FFFFFF?text=CO", profileUrl: "#" },
-    ...Array(30).fill(0).map((_, i) => ({
-        name: `Platform ${i + 11}`, achievement: `Tier ${i % 5 + 1} Contributor`, detail: `Achieved recognition for sustained contributions to the platform's security.`, logoUrl: `https://placehold.co/60x60/${(i * 10) % 100 + 10}6${(i * 5) % 100 + 5}a/FFFFFF?text=P${i + 11}`, profileUrl: "#"
-    }))
-];
-
-const CERTIFICATIONS_DATA = [
-    { name: "OSCP (Offensive Security Certified Professional)", issuer: "Offensive Security", year: 2022, isTop: true, logoUrl: "https://placehold.co/60x60/0D9488/FFFFFF?text=OSCP", details: "The gold standard in offensive security. Requires demonstrated ability to actively compromise systems in a controlled environment." },
-    { name: "CEH (Certified Ethical Hacker)", issuer: "EC-Council", year: 2021, isTop: true, logoUrl: "https://placehold.co/60x60/D97706/FFFFFF?text=CEH", details: "Covers 20 domains of security, including footprinting, scanning, enumeration, system hacking, and cloud security." },
-    { name: "eJPT (eLearnSecurity Junior Penetration Tester)", issuer: "eLearnSecurity", year: 2020, isTop: true, logoUrl: "https://placehold.co/60x60/374151/FFFFFF?text=eJPT", details: "Practical and beginner-friendly certification focusing on black-box penetration testing methodologies." },
-    { name: "CRTO (Certified Red Team Operator)", issuer: "Rastamouse", year: 2023, isTop: true, logoUrl: "https://placehold.co/60x60/BE123C/FFFFFF?text=CRTO", details: "Specialized in modern attack techniques, Active Directory exploitation, and defensive evasion strategies in a corporate environment." },
-    { name: "CompTIA Security+", issuer: "CompTIA", year: 2019, isTop: true, logoUrl: "https://placehold.co/60x60/1E3A8A/FFFFFF?text=Sec+", details: "Foundation certification covering core security functions and best practices across various roles." },
-    ...Array(45).fill(0).map((_, i) => ({
-        name: `CyberSec Certification ${i + 6}`, issuer: `Issuer ${i % 5}`, year: 2020 + (i % 4), isTop: false, logoUrl: `https://placehold.co/60x60/${(i * 10) % 100 + 10}6${(i * 5) % 100 + 5}a/FFFFFF?text=C${i + 6}`, details: `This is a detailed description for Certification ${i + 6} covering topics like compliance, cloud architecture, and network hardening.`
-    }))
-];
-
-const REPORTS_DATA = [
-    { platform: "Client A Corp", vulnerability: "Remote Code Execution", bounty: "$15,000", date: "2024-05-10", desc: "Critical vulnerability via deserialization flaw.", link: "#" },
-    { platform: "Financial Platform", vulnerability: "Authentication Bypass", bounty: "$7,500", date: "2024-03-22", desc: "Bypassed 2FA via race condition on token validation.", link: "#" },
-    { platform: "E-commerce Site", vulnerability: "Stored XSS", bounty: "$3,000", date: "2024-01-15", desc: "High-impact XSS in user profile image upload.", link: "#" },
-    { platform: "Internal Network", vulnerability: "SSRF", bounty: "N/A (Consulting)", date: "2023-11-01", desc: "Used SSRF to access internal cloud metadata service.", link: "#" },
-    { platform: "Health Startup", vulnerability: "IDOR", bounty: "$5,000", date: "2023-09-05", desc: "Unauthorized access to patient records by changing ID.", link: "#" },
-    { platform: "Gaming Company", vulnerability: "Logic Flaw", bounty: "$10,000", date: "2023-07-19", desc: "Exploited currency duplication in the in-game store.", link: "#" },
-    { platform: "Gov Agency", vulnerability: "Information Disclosure", bounty: "$4,000", date: "2023-05-30", desc: "Leaked sensitive configuration files via path traversal.", link: "#" },
-    { platform: "Social Media App", vulnerability: "CSRF", bounty: "$2,500", date: "2023-03-12", desc: "Forced users to change their account email.", link: "#" },
-];
-const combinedReportsData = [...REPORTS_DATA, ...REPORTS_DATA];
-
-
-const ACCESS_LOG_DATA = [
-    { date: "2024-06-01", activity: "Completed 'Advanced Web Exploitation' Training Module.", icon: LucideIcons.CheckCircle, color: "text-teal-400" },
-    { date: "2024-05-10", activity: "Disclosed Critical RCE to Client A Corp, awarded $15,000 bounty.", icon: LucideIcons.Zap, color: "text-red-500" },
-    { date: "2024-04-15", activity: "Presented 'Modern IDOR Techniques' at local security meetup.", icon: LucideIcons.User, color: "text-blue-400" },
-    { date: "2024-03-22", activity: "Resolved 5 High-Severity Bugcrowd reports for Financial Platform.", icon: LucideIcons.Shield, color: "text-yellow-500" },
-    { date: "2023-12-01", activity: "Achieved 'Sensei' rank on Hack The Box.", icon: LucideIcons.Trophy, color: "text-indigo-400" },
-];
-
-const CONTACT_LINKS = [
-    { name: "Professional Mail", link: "mailto:asanul.prof@example.com", icon: LucideIcons.Mail, color: "#06b6d4", isEmail: true }, // Teal
-    { name: "Personal Mail", link: "mailto:asanul.personal@example.com", icon: LucideIcons.Send, color: "#f97316", isEmail: true }, // Orange
-    { name: "WhatsApp Chat", link: "https://wa.me/8801700000000", icon: LucideIcons.MessageSquare, color: "#25d366" }, // Green
-    { name: "LinkedIn", link: "https://linkedin.com/in/asanulhoesann", icon: LucideIcons.Linkedin, color: "#3b82f6" }, // Blue
-    { name: "GitHub", link: "https://github.com/asanulhoesann", icon: LucideIcons.Github, color: "#ffffff" }, // White
-    { name: "Twitter/X", link: "https://twitter.com/asanulhoesann", icon: LucideIcons.Twitter, color: "#38bdf8" }, // Sky Blue
-    { name: "HackerOne Profile", link: "https://hackerone.com/profile", icon: LucideIcons.Zap, color: "#06b6d4" }, // Teal
-    { name: "Bugcrowd Profile", link: "https://bugcrowd.com/profile", icon: LucideIcons.Bug, color: "#EF4444" }, // Red
-    { name: "TryHackMe Profile", link: "https://tryhackme.com/p/profile", icon: LucideIcons.Code, color: "#10B981" }, // Emerald
-    { name: "Telegram", link: "https://t.me/asanulhoesann", icon: LucideIcons.Send, color: "#229ED9" }, // Telegram Blue
-];
-
-const emailLinks = CONTACT_LINKS.filter(link => link.isEmail);
-const otherLinks = CONTACT_LINKS.filter(link => !link.isEmail);
-
-
-// --- UTILITY COMPONENTS ---
-
-// Simplified useCountUp for plain React/Babel environment
-const useCountUp = (endValue) => {
-    const [count, setCount] = useState(0);
-
-    useEffect(() => {
-        let startTime = performance.now();
-        const duration = 1500; // 1.5 seconds
-
-        const animate = (currentTime) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(1, elapsed / duration);
-            const value = Math.round(progress * endValue);
-            setCount(value);
-
-            if (progress < 1) {
-                requestAnimationFrame(animate);
-            }
-        };
-
-        requestAnimationFrame(animate);
-    }, [endValue]);
-
-    return count;
-};
-
-// --- NEW HACKER LOADER COMPONENT ---
-const HackerLoader = ({ onLoaded }) => {
-    // Manually control the visibility
-    const [isVisible, setIsVisible] = useState(true);
-
-    useEffect(() => {
-        // Hide the loader after 4 seconds (after animation completes)
-        const timer = setTimeout(() => {
-            setIsVisible(false);
-            onLoaded();
-        }, 4000); 
-
-        return () => clearTimeout(timer);
-    }, [onLoaded]);
-
-    if (!isVisible) return null;
-
-    return (
-        <div 
-            className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center z-[100] transition-opacity duration-500"
-            style={{ opacity: isVisible ? 1 : 0 }}
-        >
-            <div className="w-4/5 max-w-lg p-6 bg-gray-900 border-2 border-teal-500 shadow-xl shadow-teal-900/50 rounded-lg">
-                <p className="hacker-text text-xl mb-3">$ Initializing Security Protocol...</p>
-                
-                <div className="h-6 mb-4 bg-gray-800 border border-teal-500/50 rounded overflow-hidden">
-                    {/* Progress Bar Animation */}
-                    <div 
-                        className="h-full terminal-bar" 
-                        style={{ animationDuration: '3.5s', backgroundColor: '#06b6d4' }}
-                    ></div>
-                </div>
-
-                <div className="hacker-text text-sm mb-3">
-                    <span 
-                        className="terminal-type" 
-                        style={{ animationDuration: '3.0s', animationDelay: '0.5s' }}
-                    >
-                        > Authenticating User: Asanul Hoque Esan... OK
-                    </span>
-                    <br />
-                    <span 
-                        className="terminal-type" 
-                        style={{ animationDuration: '3.5s', animationDelay: '1.5s' }}
-                    >
-                        > Loading Portfolio Data [256MB]... Complete
-                    </span>
-                </div>
-                
-                <p className="hacker-text text-lg text-teal-400 mt-4">$ Access Granted | Welcome Back.</p>
-            </div>
-        </div>
-    );
-};
-
-
-// 1. STATUS Section
-const StatusSection = () => {
-    const [displayedRole, setDisplayedRole] = useState('');
-    const [roleIndex, setRoleIndex] = useState(0);
-    const [isDeleting, setIsDeleting] = useState(false);
-    const [typingSpeed, setTypingSpeed] = useState(150);
-
-    useEffect(() => {
-        const currentRole = TYPING_ROLES[roleIndex % TYPING_ROLES.length];
-        let timeout;
-
-        if (isDeleting) {
-            setTypingSpeed(50);
-            if (displayedRole.length > 0) {
-                timeout = setTimeout(() => {
-                    setDisplayedRole(currentRole.substring(0, displayedRole.length - 1));
-                }, typingSpeed);
-            } else {
-                setIsDeleting(false);
-                setRoleIndex(prev => prev + 1);
-            }
-        } else {
-            setTypingSpeed(150);
-            if (displayedRole.length < currentRole.length) {
-                timeout = setTimeout(() => {
-                    setDisplayedRole(currentRole.substring(0, displayedRole.length + 1));
-                }, typingSpeed);
-            } else {
-                setTypingSpeed(3000);
-                timeout = setTimeout(() => {
-                    setIsDeleting(true);
-                }, typingSpeed);
-            }
-        }
-
-        return () => clearTimeout(timeout);
-    }, [displayedRole, isDeleting, roleIndex, typingSpeed]);
-
-    return (
-        <section id="STATUS" className="min-h-screen pt-24 flex items-center bg-gray-900 text-white">
-            <div className="container mx-auto px-6 py-12">
-                <div 
-                    style={{ opacity: 1, transform: 'translateY(0)' }} 
-                    className="flex flex-col lg:flex-row items-center justify-between p-8 md:p-12 bg-gray-800 rounded-3xl shadow-2xl shadow-teal-900/40 transition-all duration-800"
-                >
-                    <div className="lg:w-3/5 mb-10 lg:mb-0 text-center lg:text-left">
-                        <h1
-                            className="text-6xl md:text-8xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500"
-                        >
-                            Asanul Hoque Esan
-                        </h1>
-                        <p
-                            className="text-3xl md:text-5xl font-light text-gray-300 h-16 md:h-20 flex items-center justify-center lg:justify-start"
-                        >
-                            {displayedRole}
-                            <span
-                                className="inline-block w-1 bg-teal-400 h-8 md:h-12 ml-1 typing-cursor"
-                            />
-                        </p>
-                    </div>
-
-                    <div
-                        className="lg:w-2/5 flex justify-center lg:justify-end"
-                    >
-                        <div className="w-64 h-64 md:w-80 md:h-80 relative rounded-[50px] overflow-hidden shadow-2xl shadow-teal-600/30 border-4 border-teal-500/50 transform scale-100 transition-all duration-800">
-                            <img
-                                src="item/image.jpg"
-                                alt="Asanul Hoque Esan Headshot"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// 2. PROFILE Section
-const ProfileSection = () => {
-    const StatDisplay = ({ data }) => {
-        const count = useCountUp(data.endValue); 
-
-        return (
-            <div
-                className="bg-gray-700/50 p-6 rounded-xl shadow-lg border border-teal-700/50 text-center transition-all duration-600 hover:scale-[1.02]"
-            >
-                <data.icon className="w-8 h-8 mx-auto text-teal-400 mb-3" />
-                <div className="text-5xl font-extrabold text-white">
-                    <span>{count}</span>{data.suffix}
-                </div>
-                <p className="text-gray-400 mt-1 uppercase text-sm tracking-wider">{data.label}</p>
-            </div>
-        );
-    };
-
-    return (
-        <section id="PROFILE" className="py-24 bg-gray-900 text-white">
-            <div className="container mx-auto px-6">
-                <h2
-                    className="text-5xl font-bold text-center mb-12 text-teal-400"
-                >
-                    PROFILE
-                </h2>
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
-                    {/* Left Column: Image */}
-                    <div
-                        className="lg:col-span-1 flex justify-center lg:sticky lg:top-24"
-                    >
-                        <div className="w-64 h-64 rounded-full overflow-hidden shadow-2xl border-4 border-blue-500/50 transition-all duration-800">
-                            <img
-                                src=" item/WhatsApp Image 2025-11-15 at 19.00.03_5a92564e.jpg"
-                                alt="Asanul Hoque Esan Profile"
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Right Column: Bio & Stats */}
-                    <div className="lg:col-span-2">
-                        {/* Bio */}
-                        <div
-                            className="mb-10 transition-all duration-700"
-                        >
-                            <h3 className="text-4xl font-bold mb-4 text-white">Ethical Security, Critical Insight</h3>
-                            <p className="text-gray-400 mb-4 leading-relaxed">
-                                With <b>5+ years of dedicated experience</b> as a professional bug bounty hunter and security consultant, my focus is on finding and responsibly disclosing critical vulnerabilities across complex web applications and network infrastructures. I thrive in high-stakes environments where precision and deep technical knowledge are paramount.
-                            </p>
-                            <p className="text-gray-400 mb-4 leading-relaxed">
-                                My journey into security began with <b>competitive CTF challenges</b>, which cultivated a profound passion for problem-solving and exploring the hidden mechanisms of technology. This competitive background translates into a relentless drive to discover zero-day and complex, chained exploits that evade automated tools.
-                            </p>
-                            <p className="text-gray-400 leading-relaxed">
-                                I specialize in <b>cutting-edge web application security</b>, including modern frameworks and cloud environments. My methodology centers on critical thinking, ensuring every component is analyzed not just for common flaws, but for unique logic errors that often present the highest business risk.
-                            </p>
-
-                            <button
-                                className="mt-8 px-8 py-3 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-lg shadow-xl transition duration-300 flex items-center hover:scale-[1.05]"
-                            >
-                                Download Full Resume <LucideIcons.Download className="w-5 h-5 ml-2" />
-                            </button>
-                        </div>
-
-                        {/* Stats */}
-                        <div
-                            className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 transition-all duration-700"
-                        >
-                            {STATS_DATA.map((stat, index) => (
-                                <StatDisplay key={index} data={stat} />
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// Simplified card for horizontal scrolling (Only Icon and Name)
-const HorizontalToolCard = ({ name, icon: Icon }) => (
-    <div
-        className="inline-flex flex-col items-center justify-center p-6 rounded-2xl shadow-xl border border-gray-700 transition-all duration-300 cursor-pointer w-32 h-32 bg-gray-800 flex-shrink-0 hover:scale-[1.05]"
-    >
-        <Icon className="w-8 h-8 text-teal-400 mb-2" />
-        <h4 className="text-sm font-semibold text-white text-center whitespace-normal">{name.split(' ').slice(0, 2).join(' ')}</h4>
-    </div>
-);
-
-
-// 3. ANALYSIS Section (Tools & Vulnerabilities)
-const AnalysisSection = () => {
-    return (
-        <section id="ANALYSIS" className="py-24 bg-gray-950 text-white">
-            <div className="container mx-auto px-6">
-                <h2 className="text-5xl font-bold text-center mb-16 text-teal-400">ANALYSIS & EXPERTISE</h2>
-
-                {/* --- Tools I Know (Horizontal Auto-Scroll RTL) --- */}
-                <h3 className="text-3xl font-semibold mb-8 border-b border-gray-700 pb-3 text-white">
-                    Tools I Know ({TOOLS_DATA.length} Total)
-                </h3>
-                <div className="overflow-x-hidden pb-6 mb-20 border-y border-gray-700/50 py-4 bg-gray-900/50">
-                    <div className="autoscroll-container-rtl space-x-6">
-                        {combinedToolsData.map((tool, index) => (
-                            <HorizontalToolCard key={index} {...tool} />
-                        ))}
-                    </div>
-                </div>
-
-                {/* --- Vulnerabilities I Know (Horizontal Auto-Scroll LTR) --- */}
-                <h3 className="text-3xl font-semibold mb-8 border-b border-gray-700 pb-3 text-white">
-                    Vulnerabilities I Know ({VULNS_DATA.length} Total)
-                </h3>
-                <div className="overflow-x-hidden pb-6 border-y border-gray-700/50 py-4 bg-gray-900/50">
-                    <div className="autoscroll-container-ltr space-x-6">
-                        {combinedVulnsData.map((vuln, index) => (
-                            <HorizontalToolCard key={index} name={vuln.name} icon={vuln.icon} />
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// 4. ACCOMPLISH Section
-const AccomplishSection = () => {
-    const [showAllPlatforms, setShowAllPlatforms] = useState(false);
-
-    const platformsToShow = useMemo(() => {
-        return showAllPlatforms ? PLATFORMS_DATA : PLATFORMS_DATA.slice(0, INITIAL_VISIBLE_PLATFORMS);
-    }, [showAllPlatforms]);
-
-    const PlatformCard = ({ name, achievement, detail, logoUrl, profileUrl }) => (
-        <a
-            href={profileUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-gray-800 p-6 rounded-2xl shadow-xl flex flex-col items-center text-center transition-all duration-300 cursor-pointer border border-gray-700 hover:border-blue-500 h-72 hover:scale-[1.03]"
-        >
-            {/* Logo/Image */}
-            <img
-                src={logoUrl}
-                alt={`${name} Logo`}
-                className="w-14 h-14 rounded-full object-contain mb-4 bg-gray-700 p-1"
-                onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/60x60/374151/FFFFFF?text=P" }}
-            />
-            
-            {/* Platform Name */}
-            <h4 className="text-xl font-bold text-white mb-2 truncate w-full">{name}</h4>
-            
-            {/* Achievement Headline (Top 1%, MVP, etc.) */}
-            <p className="text-teal-400 font-semibold text-sm uppercase mt-1 mb-3">{achievement}</p>
-            
-            {/* Detailed Description */}
-            <p className="text-gray-400 text-sm flex-grow line-clamp-3">{detail}</p>
-            
-            {/* Link Icon */}
-            <div className="mt-3 flex items-center text-blue-500 text-xs font-medium">
-                View Profile <LucideIcons.ExternalLink className="w-4 h-4 ml-1" />
-            </div>
-        </a>
-    );
-
-    return (
-        <section id="ACCOMPLISH" className="py-24 bg-gray-900 text-white">
-            <div className="container mx-auto px-6">
-                <h2 className="text-5xl font-bold text-center mb-16 text-blue-400">PLATFORM ACCOMPLISHMENTS</h2>
-                <p className="text-center text-gray-400 mb-12">
-                    Showcasing key achievements across various Bug Bounty and CTF/Learning platforms. Clicking any card will attempt to open the corresponding profile.
-                </p>
-                
-                <div 
-                    className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6"
-                >
-                    {platformsToShow.map((platform, index) => (
-                        <PlatformCard key={platform.name} {...platform} />
-                    ))}
-                </div>
-
-                {/* See More/See Less Button */}
-                {PLATFORMS_DATA.length > INITIAL_VISIBLE_PLATFORMS && (
-                    <div className="text-center mt-12">
-                        <button
-                            onClick={() => setShowAllPlatforms(prev => !prev)}
-                            className="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg flex items-center mx-auto shadow-xl transition duration-300 hover:scale-[1.05] active:scale-[0.95]"
-                        >
-                            {showAllPlatforms ? (
-                                <>
-                                    See Less <LucideIcons.ChevronUp className="w-5 h-5 ml-2" />
-                                </>
-                            ) : (
-                                <>
-                                    See More ({PLATFORMS_DATA.length - INITIAL_VISIBLE_PLATFORMS} More) <LucideIcons.ChevronDown className="w-5 h-5 ml-2" />
-                                </>
-                            )}
-                        </button>
-                    </div>
-                )}
-            </div>
-        </section>
-    );
-};
-
-// Cert Details Modal Component
-const CertDetailsModal = ({ cert, onClose }) => {
-    if (!cert) return null;
-
-    return (
-        <div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 transition-opacity duration-300"
-            onClick={onClose}
-            style={{ opacity: 1 }}
-        >
-            <div
-                className="bg-gray-800 w-full max-w-xl max-h-[70vh] overflow-y-auto rounded-3xl p-8 shadow-2xl border-2 border-teal-500 transition-all duration-300 transform scale-100"
-                onClick={e => e.stopPropagation()}
-            >
-                <div className="flex justify-between items-start mb-6 border-b border-gray-700 pb-4">
-                    <div className="flex items-center">
-                        <img
-                            src={cert.logoUrl}
-                            alt={`${cert.name} Logo`}
-                            className="w-16 h-16 rounded-full object-contain mr-4 bg-gray-700"
-                            onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/60x60/374151/FFFFFF?text=C" }}
-                        />
-                        <div>
-                            <h3 className="text-3xl font-bold text-teal-400 leading-tight">{cert.name}</h3>
-                            <p className="text-sm text-gray-400 mt-1">{cert.issuer} ({cert.year})</p>
-                        </div>
-                    </div>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white mt-1">
-                        <LucideIcons.X className="w-8 h-8" />
-                    </button>
-                </div>
-
-                <div className="space-y-4">
-                    <p className="text-gray-300 leading-relaxed">
-                        {cert.details}
-                    </p>
-                    <div className="pt-4 border-t border-gray-700">
-                        <p className="font-semibold text-white">Issuance Details:</p>
-                        <ul className="text-sm text-gray-400 list-disc list-inside ml-2">
-                            <li>Issuer: {cert.issuer}</li>
-                            <li>Year: {cert.year}</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// 5. DOCUMENTS Section (Certs & Reports)
-const DocumentsSection = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedCert, setSelectedCert] = useState(null);
-
-    const CertCard = ({ name, issuer, year, logoUrl, isTop, details }) => (
-        <div
-            onClick={() => setSelectedCert({ name, issuer, year, logoUrl, details })}
-            className={`flex items-center p-4 rounded-xl shadow-lg border cursor-pointer transition-all duration-300 hover:scale-[1.03] ${isTop ? 'bg-gray-800 border-teal-600/50 hover:border-teal-400' : 'bg-gray-700/50 border-gray-600/50 hover:border-gray-500'}`}
-        >
-            <img
-                src={logoUrl}
-                alt={`${name} Logo`}
-                className="w-12 h-12 rounded-full object-contain mr-4 bg-gray-600"
-                onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/60x60/374151/FFFFFF?text=C" }}
-            />
-            <div>
-                <h4 className="font-semibold text-white">{name}</h4>
-                <p className="text-sm text-gray-400">{issuer} ({year})</p>
-            </div>
-        </div>
-    );
-
-    const ReportCard = ({ platform, vulnerability, bounty, date, desc, link }) => (
-        <div
-            className="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 transition-all duration-300 h-full hover:shadow-blue-500/30 hover:translate-y-[-5px]"
-        >
-            <div className="flex justify-between items-start mb-3">
-                <h4 className="text-xl font-bold text-white">{platform}</h4>
-                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${bounty.includes('$') ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
-                    {bounty}
-                </span>
-            </div>
-            <p className="text-teal-400 font-medium mb-2">{vulnerability}</p>
-            <p className="text-gray-400 text-sm mb-4 line-clamp-2">{desc}</p>
-            <div className="flex justify-between items-center text-xs text-gray-500">
-                <span>Discovery: {date}</span>
-                <a href={link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 flex items-center">
-                    View Report <LucideIcons.ExternalLink className="w-3 h-3 ml-1" />
-                </a>
-            </div>
-        </div>
-    );
-
-    return (
-        <section id="DOCUMENTS" className="py-24 bg-gray-950 text-white">
-            <div className="container mx-auto px-6">
-                <h2 className="text-5xl font-bold text-center mb-16 text-blue-400">DOCUMENTS & REPORTS</h2>
-
-                {/* Certifications */}
-                <h3 className="text-3xl font-semibold mb-8 border-b border-gray-700 pb-3 text-white">
-                    Top Certifications
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-12">
-                    {CERTIFICATIONS_DATA.filter(c => c.isTop).map((cert, index) => (
-                        <CertCard key={index} {...cert} />
-                    ))}
-                </div>
-
-                <div className="text-center mb-16">
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="px-6 py-3 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-lg flex items-center mx-auto transition duration-300 hover:scale-[1.05] active:scale-[0.95]"
-                    >
-                        See More Certifications <LucideIcons.ChevronDown className="w-5 h-5 ml-2" />
-                    </button>
-                </div>
-
-                {/* Reports */}
-                <h3 className="text-3xl font-semibold mb-8 border-b border-gray-700 pb-3 text-white">
-                    Vulnerability Reports (My Find) ({REPORTS_DATA.length} Total)
-                </h3>
-                {/* Horizontal Auto-Scroll (RTL) for Reports */}
-                <div className="overflow-x-hidden pb-6 mb-12 border-y border-gray-700/50 py-4 bg-gray-900/50">
-                    <div className="autoscroll-container-rtl space-x-6">
-                        {combinedReportsData.map((report, index) => (
-                            // Each report card must have a fixed width to ensure scroll smoothness
-                            <div key={index} className="flex-shrink-0 w-80"> 
-                                <ReportCard {...report} index={index} />
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-
-                {/* All Certifications Modal */}
-                {isModalOpen && (
-                    <div
-                        className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 transition-opacity duration-300"
-                        onClick={() => setIsModalOpen(false)}
-                        style={{ opacity: 1 }}
-                    >
-                        <div
-                            className="bg-gray-800 w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl p-8 shadow-2xl transition-all duration-300 transform scale-100"
-                            onClick={e => e.stopPropagation()}
-                        >
-                            <div className="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
-                                <h3 className="text-3xl font-bold text-teal-400">All Certifications</h3>
-                                <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-white">
-                                    <LucideIcons.X className="w-8 h-8" />
-                                </button>
-                            </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {CERTIFICATIONS_DATA.map((cert, index) => (
-                                    <CertCard key={index} {...cert} />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Single Certification Details Modal (New) */}
-                {selectedCert && (
-                    <CertDetailsModal cert={selectedCert} onClose={() => setSelectedCert(null)} />
-                )}
-            </div>
-        </section>
-    );
-};
-
-// 6. ACCESS_LOG Section
-const AccessLogSection = () => {
-    const LogCard = ({ date, activity, icon: Icon, color }) => (
-        <div
-            className="bg-gray-800 p-5 rounded-xl shadow-lg border border-gray-700 flex items-start space-x-4 transition-all duration-600 hover:shadow-teal-500/20 hover:scale-[1.02]"
-        >
-            <Icon className={`w-6 h-6 flex-shrink-0 ${color}`} />
-            <div>
-                <p className="text-xs uppercase font-semibold text-gray-500">{date}</p>
-                <p className="text-white mt-1">{activity}</p>
-            </div>
-        </div>
-    );
-
-    return (
-        <section id="ACCESS_LOG" className="py-24 bg-gray-900 text-white">
-            <div className="container mx-auto px-6">
-                <h2 className="text-5xl font-bold text-center mb-16 text-teal-400">ACCESS LOG / MILESTONES</h2>
-                <div className="max-w-4xl mx-auto space-y-8 relative">
-                    {/* Timeline Line */}
-                    <div className="absolute left-1/2 -translate-x-1/2 h-full w-0.5 bg-gray-700 hidden md:block"></div>
-
-                    {ACCESS_LOG_DATA.map((log, index) => (
-                        <div key={index} className="relative md:grid md:grid-cols-2 md:gap-12 items-center">
-                            {/* Connector Dot */}
-                            <div className="hidden md:block absolute left-1/2 z-10 w-4 h-4 rounded-full bg-teal-500 border-2 border-gray-900 -ml-2 transform -translate-y-1/2 top-1/2"></div>
-
-                            {/* Card positioning based on index */}
-                            {index % 2 === 0 ? (
-                                <div className="md:col-start-1 md:text-right">
-                                    <LogCard {...log} />
-                                </div>
-                            ) : (
-                                <div className="md:col-start-2">
-                                    <LogCard {...log} />
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// 7. ENCRYPT Section
-const EncryptDecryptSection = () => {
-    const [inputText, setInputText] = useState('');
-    const [output, setOutput] = useState('');
-    const [cipher, setCipher] = useState('Base64');
-    const [aesKey, setAesKey] = useState('');
-    const [isEncrypting, setIsEncrypting] = useState(true);
-    const [isTyping, setIsTyping] = useState(false);
-    const [copyStatus, setCopyStatus] = useState('');
-    const [typingTimeout, setTypingTimeout] = useState(null);
-
-    // --- ENCRYPTION/DECRYPTION FUNCTIONS ---
-
-    const base64Encode = (str) => btoa(str);
-    const base64Decode = (str) => {
-        try { return atob(str); } catch { return "Error: Invalid Base64 input."; }
-    };
-
-    const rot13 = (str) => {
-        return str.replace(/[a-zA-Z]/g, (c) => {
-            const charCode = c.charCodeAt(0);
-            const offset = (charCode <= 90) ? 65 : 97; 
-            return String.fromCharCode(((charCode - offset + 13) % 26) + offset);
-        });
-    };
-
-    const mockAes = (str, key) => {
-        if (!key || key.length < 8) return "Error: AES/XOR requires a strong key (8+ chars).";
-        if (isEncrypting) return `AES-256(${key}): Encrypted result of: "${str.substring(0, 20)}..."`;
-        return `AES-256(${key}): Decrypted result of: "${str.substring(0, 20)}..."`;
-    };
-
-    const xorCipher = (str, key) => {
-        if (!key || key.length === 0) return "Error: XOR requires a key.";
-        let result = '';
-        for (let i = 0; i < str.length; i++) {
-            const charCode = str.charCodeAt(i);
-            const keyCode = key.charCodeAt(i % key.length);
-            result += String.fromCharCode(charCode ^ keyCode);
-        }
-        return isEncrypting ? base64Encode(result) : base64Decode(result);
-    };
-
-    const processText = useCallback(() => {
-        if (typingTimeout) clearTimeout(typingTimeout);
-        if (!inputText) return setOutput('');
-
-        let result = '';
-        switch (cipher) {
-            case 'Base64':
-                result = isEncrypting ? base64Encode(inputText) : base64Decode(inputText);
-                break;
-            case 'ROT13':
-                result = rot13(inputText);
-                break;
-            case 'AES-256':
-                result = mockAes(inputText, aesKey);
-                break;
-            case 'XOR':
-                result = xorCipher(inputText, aesKey);
-                break;
-            default:
-                result = 'Invalid Cipher Selected';
-        }
-
-        setIsTyping(true);
-        setOutput('');
-        let i = 0;
-        const interval = setInterval(() => {
-            if (i < result.length) {
-                setOutput(prev => prev + result.charAt(i));
-                i++;
-            } else {
-                clearInterval(interval);
-                setIsTyping(false);
-            }
-        }, 10);
-        setTypingTimeout(interval); 
-
-    }, [inputText, cipher, aesKey, isEncrypting, typingTimeout]);
-
-    const handleCopy = () => {
-        if (output) {
-            const tempInput = document.createElement('textarea');
-            tempInput.value = output;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-
-            setCopyStatus('Copied!');
-            setTimeout(() => setCopyStatus(''), 2000);
-        }
-    };
-
-    const getAesKeyStrength = () => {
-        if (aesKey.length === 0) return { strength: 0, text: "Enter Key" };
-        if (aesKey.length < 8) return { strength: 1, text: "Weak" };
-        if (aesKey.length < 16) return { strength: 2, text: "Medium" };
-        return { strength: 3, text: "Strong" };
-    };
-
-    const keyStrength = getAesKeyStrength();
-
-    return (
-        <section id="ENCRYPT" className="py-24 bg-gray-950 text-white">
-            <div className="container mx-auto px-6">
-                <h2 className="text-5xl font-bold text-center mb-16 text-blue-400">ENCRYPT / DECRYPT</h2>
-
-                <div
-                    className="bg-gray-800 p-8 rounded-3xl shadow-2xl shadow-blue-900/40 transition-all duration-700"
-                >
-                    <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mb-8">
-                        {/* Mode Toggle */}
-                        <div className="flex bg-gray-700 rounded-lg p-1">
-                            <button
-                                onClick={() => setIsEncrypting(true)}
-                                className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${isEncrypting ? 'bg-teal-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
-                            >
-                                Encrypt
-                            </button>
-                            <button
-                                onClick={() => setIsEncrypting(false)}
-                                className={`px-4 py-2 rounded-lg font-semibold transition-colors duration-300 ${!isEncrypting ? 'bg-teal-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}`}
-                            >
-                                Decrypt
-                            </button>
-                        </div>
-
-                        {/* Cipher Select */}
-                        <div className="flex-grow">
-                            <select
-                                value={cipher}
-                                onChange={(e) => {
-                                    setCipher(e.target.value);
-                                    setOutput('');
-                                }}
-                                className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2.5 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                            >
-                                {['Base64', 'ROT13', 'XOR', 'AES-256'].map(c => (
-                                    <option key={c} value={c}>{c}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Key Input (Conditional) */}
-                    {(cipher === 'AES-256' || cipher === 'XOR') && (
-                        <div className="mb-8">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                {cipher} Key
-                            </label>
-                            <input
-                                type="password"
-                                value={aesKey}
-                                onChange={(e) => setAesKey(e.target.value)}
-                                placeholder="Enter symmetric key here..."
-                                className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-2.5 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                            />
-                            {cipher === 'AES-256' && (
-                                <div className="mt-2 flex items-center text-sm">
-                                    <LucideIcons.Gauge className="w-4 h-4 mr-2 text-gray-400" />
-                                    <span className="mr-3 text-gray-400">Key Strength:</span>
-                                    <div className="flex space-x-1">
-                                        {[1, 2, 3].map(level => (
-                                            <div
-                                                key={level}
-                                                className={`h-2 w-10 rounded-full transition-all duration-300 ${level <= keyStrength.strength
-                                                    ? (level === 1 ? 'bg-red-500' : level === 2 ? 'bg-yellow-500' : 'bg-green-500')
-                                                    : 'bg-gray-600'
-                                                    }`}
-                                            ></div>
-                                        ))}
-                                    </div>
-                                    <span className={`ml-3 font-semibold ${keyStrength.strength === 3 ? 'text-green-400' : keyStrength.strength === 1 ? 'text-red-400' : 'text-yellow-400'}`}>
-                                        {keyStrength.text}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    )}
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* Input Panel */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">{isEncrypting ? 'Plain Text Input' : 'Cipher Text Input'}</label>
-                            <textarea
-                                value={inputText}
-                                onChange={(e) => setInputText(e.target.value)}
-                                rows="8"
-                                placeholder={`Enter text to ${isEncrypting ? 'encrypt' : 'decrypt'}...`}
-                                className="w-full bg-gray-700 text-white border border-gray-600 rounded-lg p-4 focus:ring-teal-500 focus:border-teal-500 transition-colors"
-                            ></textarea>
-                        </div>
-
-                        {/* Output Panel */}
-                        <div className="relative">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Output</label>
-                            <div className="bg-gray-700 text-teal-300 border border-gray-600 rounded-lg p-4 h-full min-h-[16rem] font-mono text-sm overflow-auto relative">
-                                {output || (
-                                    <span className="text-gray-500 italic">
-                                        {isTyping ? 'Processing...' : 'Output will appear here.'}
-                                    </span>
-                                )}
-                                {isTyping && (
-                                    <span
-                                        className="inline-block w-1 bg-teal-400 h-4 ml-1 typing-cursor"
-                                    />
-                                )}
-                            </div>
-
-                            <div className="absolute top-10 right-4 flex space-x-2">
-                                <button
-                                    onClick={handleCopy}
-                                    disabled={!output}
-                                    className={`p-2 rounded-full transition-colors hover:scale-[1.1] active:scale-[0.9] ${output ? 'bg-blue-600 hover:bg-blue-500' : 'bg-gray-600'} text-white`}
-                                >
-                                    {copyStatus === 'Copied!' ? <LucideIcons.CheckCircle className="w-5 h-5" /> : <LucideIcons.Copy className="w-5 h-5" />}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="mt-8 text-center">
-                        <button
-                            onClick={processText}
-                            className="px-10 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-lg rounded-xl shadow-lg transition duration-300 hover:scale-[1.05] active:scale-[0.95]"
-                        >
-                            {isEncrypting ? 'Encrypt' : 'Decrypt'} Text
-                        </button>
-                    </div>
-
-                </div>
-            </div>
-        </section>
-    );
-};
-
-// --- MAIN APPLICATION COMPONENT ---
-const App = () => {
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [theme, setTheme] = useState('dark');
-    const [activeSection, setActiveSection] = useState(NAV_ITEMS[0]);
-    const [underlineStyle, setUnderlineStyle] = useState({ width: 0, left: 0, opacity: 0 });
-    const [isLoaded, setIsLoaded] = useState(false); // New state for loading control
-
-    
-    // --- Scroll & Measurement Logic (Updated) ---
-    const updateUnderlineAndActiveSection = useCallback(() => {
-        if (!isLoaded) return; // Prevent calculations before content is ready
-
-        let currentSectionId = NAV_ITEMS[0];
-        const offset = 90; // Header height offset
-
-        // 1. Determine active section (Scroll Logic)
-        for (const item of NAV_ITEMS) {
-            const section = document.getElementById(item);
-            if (section) {
-                const rect = section.getBoundingClientRect();
-                if (rect.top <= offset + 10 && rect.bottom > offset) {
-                    currentSectionId = item;
-                    break;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        teal: {
+                            400: '#00C2FF',
+                            500: '#00A8E8',
+                            950: '#020617', // Custom deep slate
+                        },
+                        slate: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617',
+                        }
+                    },
+                    fontFamily: {
+                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace'],
+                        sans: ['ui-sans-serif', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'marquee': 'marquee 60s linear infinite',
+                        'marquee-reverse': 'marqueeReverse 60s linear infinite',
+                        'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        marqueeReverse: {
+                            '0%': { transform: 'translateX(-50%)' },
+                            '100%': { transform: 'translateX(0%)' },
+                        }
+                    },
+                    screens: {
+                        'xs': '475px', // Added for small mobiles
+                        '3xl': '1600px', // Added for ultra-wide
+                    }
                 }
             }
         }
-        setActiveSection(currentSectionId);
+    </script>
 
-        // 2. Measure and position underline (New Logic)
-        const activeLink = document.querySelector(`.nav-link[href="#${currentSectionId}"]`);
-        if (activeLink) {
-            const parent = activeLink.closest('.nav-container');
-            const parentLeft = parent ? parent.getBoundingClientRect().left : 0;
-            const linkLeft = activeLink.getBoundingClientRect().left;
-            
-            setUnderlineStyle({
-                width: activeLink.offsetWidth,
-                left: linkLeft - parentLeft,
-                opacity: 1,
-            });
-        } else {
-             setUnderlineStyle({ width: 0, left: 0, opacity: 0 });
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-    }, [isLoaded]);
-
-
-    useEffect(() => {
-        if (isLoaded) {
-            window.addEventListener('scroll', updateUnderlineAndActiveSection);
-            window.addEventListener('resize', updateUnderlineAndActiveSection);
-            
-            // Initial check immediately after loading
-            const timeout = setTimeout(updateUnderlineAndActiveSection, 50);
-
-            return () => {
-                clearTimeout(timeout);
-                window.removeEventListener('scroll', updateUnderlineAndActiveSection);
-                window.removeEventListener('resize', updateUnderlineAndActiveSection);
-            };
+        ::-webkit-scrollbar-track {
+            background: #0f172a; 
         }
-    }, [isLoaded, updateUnderlineAndActiveSection]);
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00C2FF; 
+        }
 
+        /* Utility classes */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(30, 41, 59, 0.8);
+        }
+        
+        .text-shadow-glow {
+            text-shadow: 0 0 10px rgba(0, 194, 255, 0.5);
+        }
 
-    const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-    const toggleTheme = () => setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+        /* Animation Pause on Hover */
+        .pause-hover:hover {
+            animation-play-state: paused;
+        }
 
-    const scrollToSection = (id) => {
-        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-        setIsMenuOpen(false);
-    };
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans selection:bg-teal-500/30 selection:text-teal-200 overflow-x-hidden">
 
-    // Header component updated to receive underlineStyle
-    const Header = ({ activeSection, underlineStyle }) => (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-gray-900/95 backdrop-blur-sm shadow-xl transition-all duration-300">
-            <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-                <a href="#STATUS" onClick={() => scrollToSection('STATUS')} className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500">
-                    NullLynx
-                </a>
+    <!-- Progress Bar -->
+    <div id="progress-bar" class="fixed top-0 left-0 h-1 bg-teal-400 z-50 shadow-[0_0_15px_#00C2FF] transition-all duration-100" style="width: 0%"></div>
 
-                {/* Desktop Navigation */}
-                <nav className="hidden lg:flex items-center space-x-6 relative nav-container"> {/* Added nav-container for reference */}
-                    {/* Dynamic Underline Element (New Implementation) */}
-                    <div
-                        className="absolute bottom-[-5px] h-[2px] bg-teal-400 rounded-full nav-underline"
-                        style={{
-                            width: `${underlineStyle.width}px`,
-                            left: `${underlineStyle.left}px`,
-                            opacity: underlineStyle.opacity,
-                        }}
-                    />
+    <!-- Background Elements -->
+    <div class="fixed inset-0 pointer-events-none z-0 opacity-20">
+        <div class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(6,230,179,0.1),transparent_50%)]"></div>
+        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-[radial-gradient(circle_at_50%_50%,rgba(0,194,255,0.1),transparent_50%)]"></div>
+    </div>
 
-                    {NAV_ITEMS.map(item => (
-                        <a
-                            key={item}
-                            href={`#${item}`}
-                            onClick={() => scrollToSection(item)}
-                            className={`nav-link relative font-medium transition-colors duration-200 uppercase tracking-wider text-sm ${activeSection === item ? 'text-teal-400' : 'text-gray-300 hover:text-teal-400'}`}
-                        >
-                            {item.replace(/_/g, ' ')}
-                        </a>
-                    ))}
-                    <button onClick={toggleTheme} className="p-2 rounded-full text-gray-300 hover:text-teal-400 transition-colors">
-                        {theme === 'dark' ? <LucideIcons.Sun className="w-5 h-5" /> : <LucideIcons.Moon className="w-5 h-5" />}
-                    </button>
-                </nav>
-
-                {/* Mobile Menu Button */}
-                <div className="flex items-center lg:hidden">
-                    <button onClick={toggleTheme} className="p-2 rounded-full text-gray-300 hover:text-teal-400 transition-colors mr-2">
-                        {theme === 'dark' ? <LucideIcons.Sun className="w-5 h-5" /> : <LucideIcons.Moon className="w-5 h-5" />}
-                    </button>
-                    <button onClick={toggleMenu} className="text-gray-300 hover:text-teal-400">
-                        {isMenuOpen ? <LucideIcons.X className="w-6 h-6" /> : <LucideIcons.Menu className="w-6 h-6" />}
-                    </button>
-                </div>
+    <!-- NAVIGATION -->
+    <nav class="fixed top-0 w-full z-40 bg-slate-900/90 backdrop-blur-lg border-b border-slate-800 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl 3xl:max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2 group cursor-pointer" onclick="scrollToSection('STATUS')">
+                <i data-lucide="terminal" class="w-8 h-8 text-teal-400 group-hover:animate-pulse"></i>
+                <span class="text-xl font-bold tracking-tighter text-white">null<span class="text-teal-400">lynx</span></span>
             </div>
 
-            {/* Mobile Menu Overlay */}
-            {isMenuOpen && (
-                <div
-                    className="lg:hidden absolute top-full left-0 right-0 bg-gray-900/95 shadow-lg border-t border-gray-700 p-4 transition-all duration-300"
-                >
-                    <ul className="space-y-3">
-                        {NAV_ITEMS.map(item => (
-                            <li key={item} className="relative">
-                                <a
-                                    href={`#${item}`}
-                                    onClick={() => scrollToSection(item)}
-                                    className={`block px-3 py-2 text-lg rounded-lg transition-colors duration-200 uppercase tracking-wider ${activeSection === item ? 'text-teal-400 bg-gray-800' : 'text-gray-300 hover:bg-gray-800 hover:text-teal-400'}`}
-                                >
-                                    {item.replace(/_/g, ' ')}
-                                </a>
-                                {activeSection === item && (
-                                    <div
-                                        className="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 rounded-l-lg transition-all duration-300"
-                                    />
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-            )}
-        </header>
-    );
+            <!-- Desktop Nav with Animated Underline -->
+            <div class="hidden lg:flex gap-6 xl:gap-8 text-sm font-medium tracking-widest relative" id="desktop-nav-container">
+                <!-- Nav Marker (The Sliding Line) -->
+                <div id="nav-marker" class="absolute bottom-0 h-[2px] bg-teal-400 shadow-[0_0_8px_#00C2FF] transition-all duration-300 ease-out rounded-full"></div>
 
-    const IconWrapper = ({ icon: Icon, color }) => (
-        <Icon className="w-8 h-8" style={{ color: color }} />
-    );
+                <button onclick="scrollToSection('STATUS')" data-target="STATUS" class="desktop-nav-btn nav-link text-teal-400 hover:text-white relative py-2 transition-colors">STATUS</button>
+                <button onclick="scrollToSection('PROFILE')" data-target="PROFILE" class="desktop-nav-btn nav-link text-slate-400 hover:text-white relative py-2 transition-colors">PROFILE</button>
+                <button onclick="scrollToSection('ANALYSIS')" data-target="ANALYSIS" class="desktop-nav-btn nav-link text-slate-400 hover:text-white relative py-2 transition-colors">ANALYSIS</button>
+                <button onclick="scrollToSection('ACCOMPLISH')" data-target="ACCOMPLISH" class="desktop-nav-btn nav-link text-slate-400 hover:text-white relative py-2 transition-colors">ACCOMPLISH</button>
+                <button onclick="scrollToSection('DOCUMENTS')" data-target="DOCUMENTS" class="desktop-nav-btn nav-link text-slate-400 hover:text-white relative py-2 transition-colors">DOCUMENTS</button>
+                <button onclick="scrollToSection('ACCESS_LOG')" data-target="ACCESS_LOG" class="desktop-nav-btn nav-link text-slate-400 hover:text-white relative py-2 transition-colors">ACCESS_LOG</button>
+                <button onclick="scrollToSection('ENCRYPT')" data-target="ENCRYPT" class="desktop-nav-btn nav-link text-slate-400 hover:text-white relative py-2 transition-colors">ENCRYPT</button>
+            </div>
 
-    const MailLink = ({ name, link, icon: Icon, color }) => (
-        <a
-            href={link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center p-3 rounded-lg bg-gray-900 hover:bg-teal-900 transition-all duration-200 border border-gray-700 hover:scale-[1.05] hover:translate-x-1 active:scale-[0.95]"
-            title={name}
-        >
-            <Icon className="w-6 h-6 mr-3 flex-shrink-0" style={{ color: color }} />
-            <span className="text-gray-300 text-sm font-medium truncate">{name}</span>
-        </a>
-    );
+            <!-- Mobile Toggle (Visible on Mobile & Tablet Portrait) -->
+            <button class="lg:hidden text-white focus:outline-none" onclick="toggleMobileMenu()">
+                <i data-lucide="menu" id="menu-icon" class="w-8 h-8"></i>
+            </button>
+        </div>
 
-    return (
-        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'} font-sans antialiased scroll-smooth`}>
-            {/* The Hacker Loader */}
-            <HackerLoader onLoaded={() => setIsLoaded(true)} />
-
-            <div style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.5s' }}>
-                <Header activeSection={activeSection} underlineStyle={underlineStyle} />
-                <main>
-                    <StatusSection />
-                    <ProfileSection />
-                    <AnalysisSection />
-                    <AccomplishSection />
-                    <DocumentsSection />
-                    <AccessLogSection />
-                    <EncryptDecryptSection />
-                </main>
-                {/* FOOTER: Contact Section Integration */}
-                <footer className="bg-gray-950 border-t border-gray-800 py-12">
-                    <div className="container mx-auto px-6">
-                        <div className="flex flex-col md:flex-row justify-between items-center md:items-start space-y-8 md:space-y-0">
-                            {/* Left: Branding & Copyright */}
-                            <div className="text-center md:text-left">
-                                <a href="#STATUS" onClick={() => scrollToSection('STATUS')} className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-blue-500 mb-2 block">
-                                    NullLynx
-                                </a>
-                                <p className="text-gray-500 text-sm mt-2">&copy; {new Date().getFullYear()} Asanul Hoque Esan.</p>
-                                <p className="text-gray-500 text-xs">Security Portfolio. Crafted with React & CSS.</p>
-                            </div>
-
-                            {/* Right: Get In Touch / Contact Options (Updated) */}
-                            <div className="w-full md:w-auto">
-                                <h4 className="text-2xl font-semibold text-white mb-6 border-b-2 border-teal-500 inline-block pb-1 mx-auto md:mx-0">
-                                    Get In Touch
-                                </h4>
-                                <div className="flex flex-col sm:flex-row gap-8 justify-center md:justify-end">
-                                    
-                                    {/* Left Side: 2 Email Links */}
-                                    <div className="space-y-4 w-full sm:w-56 flex-shrink-0">
-                                        <h5 className="text-lg font-medium text-gray-300 border-b border-gray-700 pb-1">Direct Mail</h5>
-                                        {emailLinks.map((item, index) => (
-                                            <MailLink key={index} {...item} />
-                                        ))}
-                                    </div>
-
-                                    {/* Right Side: 8 Social/Platform Links */}
-                                    <div className="w-full sm:w-auto">
-                                        <h5 className="text-lg font-medium text-gray-300 border-b border-gray-700 pb-1 mb-4">Platforms & Socials ({otherLinks.length})</h5>
-                                        <div className="grid grid-cols-4 gap-x-4 gap-y-6 justify-center">
-                                            {otherLinks.map((item, index) => (
-                                                <a
-                                                    key={index}
-                                                    href={item.link}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-gray-400 transition-transform duration-200 flex flex-col items-center group hover:scale-[1.25] active:scale-[0.9]"
-                                                    title={item.name}
-                                                >
-                                                    {/* Icon with inline style for color property */}
-                                                    <IconWrapper icon={item.icon} color={item.color} />
-                                                    {/* Name for accessibility/context on hover */}
-                                                    <span className="mt-1 text-xs text-gray-500 group-hover:text-teal-400 hidden sm:block">{item.name.split(' ')[0]}</span>
-                                                </a>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </footer>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-slate-900 border-b border-slate-800 overflow-hidden transition-all duration-300">
+            <div class="flex flex-col p-6 gap-4">
+                <button onclick="scrollToSection('STATUS')" class="text-left py-3 border-l-2 px-4 border-teal-400 text-teal-400 bg-teal-400/10 text-lg font-medium">STATUS</button>
+                <button onclick="scrollToSection('PROFILE')" class="text-left py-3 border-l-2 px-4 border-slate-800 text-slate-400 text-lg hover:text-white hover:bg-slate-800">PROFILE</button>
+                <button onclick="scrollToSection('ANALYSIS')" class="text-left py-3 border-l-2 px-4 border-slate-800 text-slate-400 text-lg hover:text-white hover:bg-slate-800">ANALYSIS</button>
+                <button onclick="scrollToSection('ACCOMPLISH')" class="text-left py-3 border-l-2 px-4 border-slate-800 text-slate-400 text-lg hover:text-white hover:bg-slate-800">ACCOMPLISH</button>
+                <button onclick="scrollToSection('DOCUMENTS')" class="text-left py-3 border-l-2 px-4 border-slate-800 text-slate-400 text-lg hover:text-white hover:bg-slate-800">DOCUMENTS</button>
+                <button onclick="scrollToSection('ACCESS_LOG')" class="text-left py-3 border-l-2 px-4 border-slate-800 text-slate-400 text-lg hover:text-white hover:bg-slate-800">ACCESS_LOG</button>
+                <button onclick="scrollToSection('ENCRYPT')" class="text-left py-3 border-l-2 px-4 border-slate-800 text-slate-400 text-lg hover:text-white hover:bg-slate-800">ENCRYPT</button>
             </div>
         </div>
-    );
-};
+    </nav>
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-</script>
+    <!-- 1. STATUS (HERO) -->
+    <section id="STATUS" class="min-h-screen flex items-center pt-20 relative z-10 overflow-hidden px-4 sm:px-6 group">
+        <div class="max-w-7xl 3xl:max-w-screen-2xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center w-full perspective-1000">
+            <!-- Left Content -->
+            <div class="fade-in-section opacity-0 transform translate-y-10 transition-all duration-700 group-hover:translate-x-2 text-center md:text-left relative z-20">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-950/50 border border-teal-500/30 text-teal-400 text-xs font-mono mb-6 transition-all duration-500 group-hover:border-teal-400 group-hover:shadow-[0_0_15px_rgba(45,212,191,0.3)]">
+                    <!-- Green Bati (System Online Light) -->
+                    <span class="relative flex h-3 w-3 mr-1">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 duration-75 group-hover:duration-300"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500 shadow-[0_0_10px_#4ade80] group-hover:shadow-[0_0_20px_#4ade80] transition-shadow"></span>
+                    </span>
+                    SYSTEM_ONLINE
+                </div>
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 leading-tight transition-all duration-500 group-hover:text-shadow-glow">
+                    Asanul Hoque <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400 text-shadow-glow group-hover:brightness-125 transition-all">Esan</span>
+                </h1>
+                
+                <!-- Typing Effect Container -->
+                <div class="text-xl sm:text-2xl md:text-3xl font-mono text-slate-400 h-12 flex items-center justify-center md:justify-start mb-8">
+                    <span class="mr-2 text-teal-500 group-hover:text-teal-300 transition-colors">&gt;</span>
+                    <span id="typing-text" class="group-hover:text-slate-300 transition-colors"></span><span class="animate-pulse text-teal-400">|</span>
+                </div>
 
+                <div class="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <button onclick="scrollToSection('ENCRYPT')" class="w-full sm:w-auto px-8 py-3 bg-teal-400 text-slate-950 font-bold rounded-lg hover:bg-teal-300 transition-all shadow-[0_0_20px_rgba(0,194,255,0.4)] hover:shadow-[0_0_30px_rgba(0,194,255,0.8)] hover:-translate-y-1">
+                        Initialize Encrypt
+                    </button>
+                    <button onclick="scrollToSection('DOCUMENTS')" class="w-full sm:w-auto px-8 py-3 border border-slate-700 text-slate-300 rounded-lg hover:border-teal-500 hover:text-teal-400 transition-all hover:bg-slate-900/50">
+                        View Logs
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Image (Hidden on Small Mobile, Visible on Tablet+) - UPDATED SIZE -->
+            <div class="relative h-[600px] w-[340px] mx-auto hidden md:block fade-in-section opacity-0 transform scale-95 transition-all duration-700 delay-300 group-hover:-translate-x-2 group-hover:scale-105">
+                <!-- Animated Glow Behind Image -->
+                <div class="absolute inset-0 bg-teal-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 -z-10"></div>
+                
+                <div class="absolute inset-0 bg-gradient-to-tr from-teal-500/20 to-transparent rounded-2xl transform rotate-3 transition-transform duration-700 group-hover:rotate-6"></div>
+                <div class="absolute inset-0 bg-slate-800 rounded-2xl overflow-hidden border border-slate-700 shadow-2xl group transition-all duration-700 group-hover:border-teal-500/50 group-hover:shadow-[0_0_40px_rgba(0,194,255,0.2)]">
+                    <div class="w-full h-full bg-slate-800 flex items-center justify-center text-slate-600 relative overflow-hidden">
+                         <!-- Placeholder Image Background -->
+                        <div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80')] bg-cover bg-center opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700 mix-blend-overlay"></div>
+                        <div class="z-10 text-center">
+                            <i data-lucide="shield" class="w-24 h-24 mx-auto text-teal-500/50 mb-4 transition-all duration-500 group-hover:text-teal-400 group-hover:scale-110"></i>
+                            <p class="font-mono text-sm group-hover:text-teal-300 transition-colors">/img/profile_main.jpg</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. PROFILE -->
+    <section id="PROFILE" class="py-16 md:py-24 bg-slate-900/50 relative border-t border-slate-800">
+        <div class="max-w-7xl 3xl:max-w-screen-2xl mx-auto px-4 sm:px-6">
+            <!-- Section Title -->
+            <div class="mb-12 text-center relative z-10">
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tighter mb-2">
+                    <span class="text-teal-400">./</span>PROFILE
+                </h2>
+                <p class="text-slate-400 font-mono text-sm tracking-widest uppercase">IDENTITY_VERIFIED</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-teal-500 to-emerald-400 mx-auto mt-4 rounded-full shadow-[0_0_10px_#00C2FF]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 items-center">
+                <!-- Image Column (UPDATED: LARGER SIZE) -->
+                <div class="md:col-span-5 flex flex-col items-center">
+                    
+                    <!-- Rainbow Wrapper -->
+                    <div class="relative mb-8 group">
+                         <!-- Spinning Rainbow Ring (Blurry Glow) -->
+                         <div class="absolute -inset-3 rounded-full bg-[conic-gradient(from_0deg,#ff0000,#ff7f00,#ffff00,#00ff00,#0000ff,#4b0082,#9400d3,#ff0000)] animate-[spin_4s_linear_infinite] blur opacity-75"></div>
+                         
+                         <!-- Sharp Rainbow Ring (Border) -->
+                         <div class="absolute -inset-1 rounded-full bg-[conic-gradient(from_0deg,#ff0000,#ff7f00,#ffff00,#00ff00,#0000ff,#4b0082,#9400d3,#ff0000)] animate-[spin_4s_linear_infinite]"></div>
+    
+                         <!-- Profile Image Container (LARGE SIZE) -->
+                         <div class="relative w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-full p-1.5 bg-slate-900 z-10">
+                            <div class="w-full h-full rounded-full bg-slate-800 overflow-hidden relative group cursor-pointer">
+                                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Profile" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500 transform hover:scale-110" />
+                            </div>
+                            <!-- Larger Shield Icon -->
+                            <div class="absolute bottom-6 right-6 bg-slate-900 text-teal-400 p-3 rounded-full border border-teal-500/50 shadow-lg z-20">
+                                <i data-lucide="shield" class="w-6 h-6"></i>
+                            </div>
+                         </div>
+                    </div>
+
+                    <!-- UPDATED STATS WITH ANIMATION -->
+                    <div class="grid grid-cols-3 gap-2 sm:gap-4 w-full max-w-md text-center">
+                        <div class="bg-slate-800/50 p-3 sm:p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm hover:border-teal-500/50 transition-all">
+                            <div class="text-xl sm:text-3xl font-bold text-white stat-number" data-target="350" data-suffix="+">0+</div>
+                            <div class="text-[10px] sm:text-xs text-teal-400 uppercase font-bold tracking-wider mt-1">Vulns</div>
+                        </div>
+                        <div class="bg-slate-800/50 p-3 sm:p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm hover:border-teal-500/50 transition-all">
+                            <div class="text-xl sm:text-3xl font-bold text-white stat-number" data-target="40" data-suffix="+">0+</div>
+                            <div class="text-[10px] sm:text-xs text-teal-400 uppercase font-bold tracking-wider mt-1">Clients</div>
+                        </div>
+                        <div class="bg-slate-800/50 p-3 sm:p-4 rounded-xl border border-slate-700/50 backdrop-blur-sm hover:border-teal-500/50 transition-all">
+                            <div class="text-xl sm:text-3xl font-bold text-white stat-number" data-target="98" data-suffix="%">0%</div>
+                            <div class="text-[10px] sm:text-xs text-teal-400 uppercase font-bold tracking-wider mt-1">Success</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bio Column -->
+                <div class="md:col-span-7 space-y-8 text-center md:text-left">
+                    <div class="prose prose-lg prose-invert max-w-none">
+                        <p class="text-lg sm:text-xl text-slate-300 leading-relaxed font-light">
+                            I am a dedicated <span class="text-teal-400 font-semibold">Cybersecurity Professional</span> specializing in Penetration Testing and Vulnerability Assessment. With a hacker mindset and corporate discipline, I bridge the gap between critical infrastructure flaws and robust security postures.
+                        </p>
+                        <p class="text-slate-400 text-base sm:text-lg">
+                            My methodology involves rigorous reconnaissance, manual exploitation, and detailed reporting that not only highlights risks but provides actionable remediation strategies. I have successfully secured platforms ranging from fintech startups to Fortune 500 assets.
+                        </p>
+                        <p class="text-slate-400 text-base sm:text-lg">
+                            Beyond the terminal, I am an active community member, contributing to CTFs and mentoring the next generation of white-hat hackers.
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-4 pt-4 justify-center md:justify-start">
+                        <button onclick="toggleModal('bio-modal')" class="group flex items-center gap-3 px-8 py-4 bg-slate-800 hover:bg-slate-700 text-teal-400 border border-teal-500/30 rounded-lg transition-all w-full sm:w-auto justify-center hover:shadow-[0_0_20px_rgba(0,194,255,0.2)]">
+                            <i data-lucide="eye" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+                            <span class="font-bold tracking-wide">INITIALIZE FULL BIO</span>
+                        </button>
+                        <button onclick="downloadResume()" class="group flex items-center gap-3 px-8 py-4 bg-teal-600 hover:bg-teal-500 text-white rounded-lg shadow-lg shadow-teal-500/20 transition-all w-full sm:w-auto justify-center hover:shadow-teal-500/40 hover:-translate-y-1">
+                            <i data-lucide="download" class="w-5 h-5 group-hover:animate-bounce"></i>
+                            <span class="font-bold tracking-wide">DOWNLOAD RESUME</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full Bio Modal -->
+        <div id="bio-modal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-xl hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+            <div class="bg-slate-900 w-full max-w-5xl h-[85vh] rounded-xl border border-slate-700 shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300" id="bio-modal-content">
+                <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-slate-700 overflow-hidden border-2 border-teal-500">
+                             <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80" class="w-full h-full object-cover" />
+                        </div>
+                        <div class="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-3">
+                            <h3 class="text-xl font-bold text-white">Asanul Hoque Esan</h3>
+                            <!-- LinkedIn Button -->
+                            <a href="https://www.linkedin.com/" target="_blank" class="flex w-fit items-center gap-2 px-3 py-1 rounded-full bg-blue-950/30 border border-blue-500/30 text-blue-400 text-xs font-bold hover:bg-blue-600 hover:text-white hover:border-blue-400 transition-all duration-300 group">
+                                <i data-lucide="linkedin" class="w-3 h-3 group-hover:scale-110 transition-transform"></i>
+                                <span>LinkedIn</span>
+                            </a>
+                        </div>
+                    </div>
+                    <button onclick="toggleModal('bio-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                
+                <div class="p-8 overflow-y-auto font-mono text-sm text-slate-400 leading-loose scrollbar-thin">
+                    <p class="mb-6 text-teal-500 font-bold">-- BEGIN TRANSMISSION --</p>
+                    <div id="bio-text-content">
+                        <!-- Content injected via JS -->
+                    </div>
+                    <p class="mt-6 text-teal-500 font-bold">-- END TRANSMISSION --</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. ANALYSIS -->
+    <section id="ANALYSIS" class="py-16 md:py-24 relative overflow-hidden">
+        <div class="mb-12 text-center relative z-10 px-4">
+            <h2 class="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tighter mb-2">
+                <span class="text-teal-400">./</span>ANALYSIS
+            </h2>
+            <p class="text-slate-400 font-mono text-sm tracking-widest uppercase">KNOWLEDGE_BASE</p>
+            <div class="w-24 h-1 bg-gradient-to-r from-teal-500 to-emerald-400 mx-auto mt-4 rounded-full shadow-[0_0_10px_#00C2FF]"></div>
+        </div>
+
+        <!-- Modals (Standard, Web Pentest, Expertise) -->
+        <div id="analysis-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onclick="closeAnalysisModal()">
+            <div class="bg-slate-800 border border-teal-500 p-6 rounded-lg max-w-md w-full shadow-[0_0_50px_rgba(0,194,255,0.2)] transform transition-all scale-100" onclick="event.stopPropagation()">
+                <h3 id="modal-title" class="text-2xl font-bold text-teal-400 mb-2">Title</h3>
+                <div id="modal-desc" class="text-slate-300 mb-4 text-sm leading-relaxed">Description</div>
+                <span id="modal-tag" class="px-2 py-1 rounded text-xs font-bold hidden">Tag</span>
+            </div>
+        </div>
+
+        <div id="web-pentest-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl transition-opacity duration-300 opacity-0">
+             <div class="bg-slate-900 w-full max-w-6xl h-[90vh] rounded-xl border border-teal-500 shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+                <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-teal-500/20 rounded-lg flex items-center justify-center border border-teal-500/40">
+                            <i data-lucide="globe" class="text-teal-400"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white tracking-tight">WEB PENTESTING DEEP DIVE</h3>
+                            <p class="text-xs text-teal-400 font-mono">DOCUMENT_SIZE: 5000+ WORDS // CLASSIFIED</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleModal('web-pentest-modal')" class="text-slate-400 hover:text-white hover:bg-slate-700 p-2 rounded-full transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div class="p-8 overflow-y-auto font-mono text-sm text-slate-300 leading-loose scrollbar-thin">
+                    <div id="web-pentest-content" class="max-w-4xl mx-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="expertise-large-modal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-slate-950/95 backdrop-blur-xl transition-opacity duration-300 opacity-0">
+             <div class="bg-slate-900 w-full max-w-6xl h-[90vh] rounded-xl border border-purple-500 shadow-2xl flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
+                <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center border border-purple-500/40">
+                            <i data-lucide="cpu" class="text-purple-400"></i>
+                        </div>
+                        <div>
+                            <h3 id="expertise-modal-title" class="text-xl font-bold text-white tracking-tight">EXPERTISE DEEP DIVE</h3>
+                            <p class="text-xs text-purple-400 font-mono">KNOWLEDGE_BASE: 5000+ WORDS // INDEXED</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleModal('expertise-large-modal')" class="text-slate-400 hover:text-white hover:bg-slate-700 p-2 rounded-full transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+                </div>
+                <div class="p-8 overflow-y-auto font-mono text-sm text-slate-300 leading-loose scrollbar-thin">
+                    <div id="expertise-modal-content" class="max-w-4xl mx-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-12">
+            <!-- Tools Row -->
+            <div class="relative group">
+                <h3 class="text-center text-teal-500 font-mono text-sm mb-4 flex items-center justify-center gap-2"><i data-lucide="code" class="w-4 h-4"></i> TOOLS_ARSENAL</h3>
+                <div class="flex overflow-hidden relative w-full mask-linear">
+                    <div class="absolute z-10 left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-slate-950 to-transparent pointer-events-none"></div>
+                    <div class="absolute z-10 right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none"></div>
+                    <div class="flex gap-4 py-4 animate-marquee pause-hover w-max" id="tools-marquee"></div>
+                </div>
+            </div>
+
+            <!-- Vulns Row -->
+            <div class="relative group">
+                <h3 class="text-center text-teal-500 font-mono text-sm mb-4 flex items-center justify-center gap-2"><i data-lucide="shield" class="w-4 h-4"></i> KNOWN_VULNERABILITIES</h3>
+                <div class="flex overflow-hidden relative w-full">
+                     <div class="absolute z-10 left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-slate-950 to-transparent pointer-events-none"></div>
+                    <div class="absolute z-10 right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none"></div>
+                    <div class="flex gap-4 py-4 animate-marquee-reverse pause-hover w-max" id="vulns-marquee"></div>
+                </div>
+            </div>
+
+            <!-- CORE EXPERTISE - Single Box -->
+             <div class="relative py-12 flex justify-center px-4">
+                 <div class="w-full max-w-3xl relative group cursor-pointer" onclick="openWebPentestModal()">
+                     <div class="absolute -inset-1 bg-gradient-to-r from-teal-500 to-emerald-400 rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+                     <div class="relative bg-slate-900 border-2 border-teal-500/50 hover:border-teal-400 rounded-xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-6 transition-all duration-300 hover:shadow-[0_0_40px_rgba(0,194,255,0.15)]">
+                         <div class="w-20 h-20 rounded-full bg-teal-500/10 flex items-center justify-center border border-teal-500/30 shrink-0 group-hover:scale-110 transition-transform">
+                             <i data-lucide="globe" class="w-10 h-10 text-teal-400"></i>
+                         </div>
+                         <div class="text-center md:text-left flex-1">
+                             <div class="flex flex-col md:flex-row items-center justify-center md:justify-start gap-3 mb-2">
+                                 <h3 class="text-2xl md:text-3xl font-bold text-white tracking-tight">WEB PENTESTING</h3>
+                                 <span class="px-2 py-0.5 rounded bg-teal-500/20 text-teal-400 text-xs font-bold border border-teal-500/30">CORE_SKILL</span>
+                             </div>
+                             <p class="text-slate-400 mb-4 leading-relaxed text-sm md:text-base">
+                                 Mastery in uncovering critical vulnerabilities including OWASP Top 10. Specialized in logic flaw detection, API security, and advanced exploitation techniques.
+                             </p>
+                             <div class="inline-flex items-center gap-2 text-teal-400 font-mono text-sm group-hover:underline underline-offset-4">
+                                 <span>CLICK_TO_VIEW_FULL_DETAILS</span>
+                                 <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                             </div>
+                         </div>
+                     </div>
+                 </div>
+            </div>
+
+             <!-- Expertise Row -->
+             <div class="relative group">
+                <h3 class="text-center text-teal-500 font-mono text-sm mb-4 flex items-center justify-center gap-2"><i data-lucide="star" class="w-4 h-4"></i> MY_BEST_EXPERTISE</h3>
+                <div class="flex overflow-hidden relative w-full">
+                    <div class="absolute z-10 left-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-r from-slate-950 to-transparent pointer-events-none"></div>
+                    <div class="absolute z-10 right-0 top-0 bottom-0 w-12 sm:w-24 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none"></div>
+                    <div class="flex gap-4 py-4 animate-marquee-reverse pause-hover w-max" id="expertise-marquee"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. ACCOMPLISH -->
+    <section id="ACCOMPLISH" class="py-16 md:py-24 bg-slate-900/30">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-12 text-center relative z-10">
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tighter mb-2">
+                    <span class="text-teal-400">./</span>ACCOMPLISH
+                </h2>
+                <p class="text-slate-400 font-mono text-sm tracking-widest uppercase">HALL_OF_FAME</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-teal-500 to-emerald-400 mx-auto mt-4 rounded-full shadow-[0_0_10px_#00C2FF]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6 items-center" id="platform-grid">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="text-center mt-12">
+                <button id="toggle-platforms-btn" onclick="togglePlatforms()" class="px-8 py-2 border border-teal-500/30 text-teal-400 rounded-full hover:bg-teal-500/10 transition-all text-sm font-mono">
+                    LOAD_ALL_PLATFORMS [50+]
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. DOCUMENTS -->
+    <section id="DOCUMENTS" class="py-16 md:py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="mb-12 text-center relative z-10">
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tighter mb-2">
+                    <span class="text-teal-400">./</span>DOCUMENTS
+                </h2>
+                <p class="text-slate-400 font-mono text-sm tracking-widest uppercase">CREDENTIALS_&_REPORTS</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-teal-500 to-emerald-400 mx-auto mt-4 rounded-full shadow-[0_0_10px_#00C2FF]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Certifications -->
+                <div>
+                    <div class="flex justify-between items-end mb-6">
+                        <h3 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2"><i data-lucide="award" class="text-teal-400"></i> Certifications</h3>
+                        <button onclick="toggleModal('cert-modal')" class="text-xs text-teal-400 hover:underline">View All (45)</button>
+                    </div>
+                    <div class="space-y-4 group" id="cert-preview-list">
+                        <!-- JS Injected -->
+                    </div>
+                </div>
+
+                <!-- Reports Scrolling -->
+                <div class="overflow-hidden">
+                    <h3 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2 mb-6"><i data-lucide="file-text" class="text-teal-400"></i> Declassified Reports</h3>
+                    <div class="relative h-[400px] overflow-hidden rounded-xl border border-slate-800 bg-slate-900/50 group">
+                        <div class="absolute inset-0 pointer-events-none z-10 bg-gradient-to-b from-slate-900 via-transparent to-slate-900"></div>
+                        <div class="p-4 space-y-4 animate-[marquee_20s_linear_infinite] hover:[animation-play-state:paused] flex flex-col" style="animation-direction: normal; animation-name: scrollUp; height: max-content;">
+                             <div id="reports-list"></div>
+                             <div id="reports-list-dup"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cert Modal -->
+        <div id="cert-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 sm:p-8 opacity-0 transition-opacity duration-300">
+            <div class="bg-slate-900 border border-teal-500 w-full max-w-4xl h-[80vh] rounded-xl p-6 sm:p-8 overflow-y-auto transform scale-95 transition-transform duration-300" id="cert-modal-content">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-4 mb-8">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-white">All Certifications</h2>
+                    <button onclick="toggleModal('cert-modal')" class="text-slate-400 hover:text-white"><i data-lucide="x"></i></button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="all-certs-grid">
+                    <!-- JS Injected -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. ACCESS LOG -->
+    <section id="ACCESS_LOG" class="py-16 md:py-24 bg-slate-900/50">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6">
+            <div class="mb-12 text-center relative z-10">
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tighter mb-2">
+                    <span class="text-teal-400">./</span>ACCESS_LOG
+                </h2>
+                <p class="text-slate-400 font-mono text-sm tracking-widest uppercase">SYSTEM_MONITORING</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-teal-500 to-emerald-400 mx-auto mt-4 rounded-full shadow-[0_0_10px_#00C2FF]"></div>
+            </div>
+            
+            <div class="bg-black border border-slate-800 rounded-lg overflow-hidden shadow-2xl font-mono text-sm">
+                <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex gap-4 text-slate-500 text-xs font-bold uppercase">
+                    <div class="w-24">Time</div>
+                    <div class="flex-1">Event</div>
+                    <div class="w-32 hidden md:block">Source IP</div>
+                    <div class="w-24">Status</div>
+                </div>
+                
+                <!-- Logs Container (Dynamic Content) -->
+                <div class="divide-y divide-slate-900 h-[360px] overflow-y-auto scrollbar-thin" id="access-logs-container">
+                    <!-- JS Injected -->
+                </div>
+
+                <!-- Pagination Controls -->
+                <div class="px-4 py-3 bg-slate-900/80 border-t border-slate-800 flex justify-between items-center">
+                    <button id="btn-prev-log" onclick="changeLogPage(-1)" class="flex items-center gap-2 px-4 py-2 rounded bg-slate-950 border border-slate-700 text-slate-400 text-xs font-bold hover:text-teal-400 hover:border-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-slate-700 disabled:hover:text-slate-400">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i> PREVIOUS
+                    </button>
+                    
+                    <span id="log-page-indicator" class="text-xs text-slate-500 font-mono tracking-wider">PAGE 1 / 15</span>
+                    
+                    <button id="btn-next-log" onclick="changeLogPage(1)" class="flex items-center gap-2 px-4 py-2 rounded bg-slate-950 border border-slate-700 text-slate-400 text-xs font-bold hover:text-teal-400 hover:border-teal-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-slate-700 disabled:hover:text-slate-400">
+                        NEXT <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="px-4 py-2 bg-slate-900/50 text-xs text-slate-600 animate-pulse border-t border-slate-900">
+                    Listening for new events...
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. ENCRYPT -->
+    <section id="ENCRYPT" class="py-16 md:py-24 relative">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="mb-12 text-center relative z-10">
+                <h2 class="text-3xl sm:text-4xl md:text-6xl font-bold text-white tracking-tighter mb-2">
+                    <span class="text-teal-400">./</span>ENCRYPT_TOOL
+                </h2>
+                <p class="text-slate-400 font-mono text-sm tracking-widest uppercase">CRYPTOGRAPHY_PLAYGROUND</p>
+                <div class="w-24 h-1 bg-gradient-to-r from-teal-500 to-emerald-400 mx-auto mt-4 rounded-full shadow-[0_0_10px_#00C2FF]"></div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                <!-- Controls -->
+                <div class="md:col-span-4 space-y-6">
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-xl">
+                        <label class="block text-slate-400 text-xs font-bold mb-2">ALGORITHM</label>
+                        <div class="relative">
+                            <select id="algo-select" class="w-full bg-slate-950 border border-slate-700 text-white p-3 rounded appearance-none focus:border-teal-500 outline-none">
+                                <!-- Options via JS -->
+                            </select>
+                            <div class="absolute right-3 top-3 pointer-events-none text-slate-500">▼</div>
+                        </div>
+
+                        <div class="flex gap-2 mt-4 p-1 bg-slate-950 rounded">
+                            <button id="btn-encrypt" onclick="setEncryptionMode('ENCRYPT')" class="flex-1 py-2 text-xs font-bold rounded transition-all bg-teal-600 text-white shadow-lg">ENCRYPT</button>
+                            <button id="btn-decrypt" onclick="setEncryptionMode('DECRYPT')" class="flex-1 py-2 text-xs font-bold rounded transition-all text-slate-500 hover:text-slate-300">DECRYPT</button>
+                        </div>
+
+                        <div id="aes-strength-container" class="mt-6 hidden">
+                            <label class="block text-slate-400 text-xs font-bold mb-2">KEY_STRENGTH</label>
+                            <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                                <div id="aes-bar" class="h-full transition-all duration-500 bg-red-500" style="width: 0%"></div>
+                            </div>
+                            <div id="aes-text" class="text-right text-xs text-slate-500 mt-1">0% (Simulated)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input/Output -->
+                <div class="md:col-span-8 grid gap-6">
+                    <div class="group">
+                        <div class="flex justify-between mb-2">
+                            <label class="text-teal-400 text-xs font-bold">INPUT_DATA</label>
+                            <button onclick="document.getElementById('input-text').value=''; processEncryption();" class="text-xs text-slate-500 hover:text-white">CLEAR</button>
+                        </div>
+                        <textarea id="input-text" oninput="processEncryption()" class="w-full h-32 bg-slate-900/80 border border-slate-700 rounded-lg p-4 text-slate-200 font-mono text-sm focus:border-teal-500 focus:ring-1 focus:ring-teal-500 outline-none transition-all resize-none placeholder:text-slate-700" placeholder="Enter data to process..."></textarea>
+                    </div>
+
+                    <div class="relative group">
+                        <div class="flex justify-between mb-2">
+                            <label class="text-emerald-400 text-xs font-bold flex items-center gap-2">
+                                OUTPUT_DATA 
+                                <span id="output-indicator" class="w-2 h-2 rounded-full bg-emerald-500 opacity-0 transition-opacity"></span>
+                            </label>
+                            <button onclick="copyOutput()" class="text-xs text-teal-500 hover:text-white flex items-center gap-1">
+                                <i data-lucide="download" class="w-3 h-3"></i> COPY
+                            </button>
+                        </div>
+                        <div id="output-text" class="w-full h-32 bg-black border border-slate-800 rounded-lg p-4 text-emerald-500 font-mono text-sm overflow-y-auto relative break-all">
+                            <span class="text-slate-800">Waiting for input...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8 md:gap-12 mb-12">
+                <div class="col-span-1 md:col-span-2">
+                    <h2 class="text-2xl font-bold text-white mb-4">null<span class="text-teal-400">lynx</span></h2>
+                    <p class="text-slate-500 max-w-sm text-sm md:text-base">
+                        Securing the digital frontier one packet at a time. Available for freelance penetration testing and security consultation.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-bold mb-4">CONTACT</h4>
+                    <ul class="space-y-2 text-slate-400 text-sm">
+                        <li class="flex items-center gap-2 hover:text-teal-400 cursor-pointer"><i data-lucide="mail" class="w-4 h-4"></i> secure@nulllynx.com</li>
+                        <li class="flex items-center gap-2 hover:text-teal-400 cursor-pointer"><i data-lucide="mail" class="w-4 h-4"></i> public@asanul.dev</li>
+                        <li class="flex items-center gap-2 hover:text-teal-400 cursor-pointer"><i data-lucide="phone" class="w-4 h-4"></i> +1 (555) 010-9999</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-white font-bold mb-4">NETWORK</h4>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="github" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="linkedin" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="twitter" class="w-4 h-4"></i></a>
+                        
+                        <!-- Added 5 New Social Links -->
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="instagram" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="message-circle" class="w-4 h-4"></i></a>
+                        <a href="#" class="w-8 h-8 bg-slate-900 rounded flex items-center justify-center text-slate-400 hover:bg-teal-500 hover:text-black transition-all"><i data-lucide="book-open" class="w-4 h-4"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center text-slate-700 text-xs font-mono border-t border-slate-900 pt-8">
+                © 2025 Asanul Hoque Esan. ALL RIGHTS RESERVED. SYSTEM_ID: 0x92F2
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* Additional Animation Keyframes for vertical scroll */
+        @keyframes scrollUp {
+            0% { transform: translateY(0%); }
+            100% { transform: translateY(-50%); }
+        }
+    </style>
+
+    <!-- LOGIC SCRIPT -->
+    <script>
+        // --- DATA ---
+        const TITLES = ["Hacker", "Bug Bounty Hunter", "CTF Player", "Pentester", "Security Researcher", "Critical Thinker"];
+        
+        const TOOLS = Array.from({ length: 50 }, (_, i) => ({
+            id: i, name: `Tool-X${i}`, icon: "🔧", details: "Advanced automation framework for reconnaissance."
+        }));
+
+        const VULNERABILITIES = Array.from({ length: 50 }, (_, i) => ({
+            id: i, name: `CVE-2025-${1000+i}`, severity: i % 3 === 0 ? "Critical" : "High", details: "Remote Code Execution via buffer overflow in legacy protocols."
+        }));
+
+        // UPDATED EXPERTISE DATA
+        const EXPERTISE_NAMES = [
+            "Network Security", "Web App Pentesting", "Cloud Security", "Reverse Engineering", 
+            "Malware Analysis", "Cryptography", "Social Engineering", "Digital Forensics", 
+            "IoT Security", "Mobile Security", "Red Teaming", "Blue Teaming", 
+            "DevSecOps", "API Security", "Wireless Security", "OSINT"
+        ];
+
+        const EXPERTISE = EXPERTISE_NAMES.map((name, i) => ({
+            id: i, name: name, details: `Advanced proficiency in ${name.toLowerCase()} methodologies and tools.`
+        }));
+
+        const PLATFORMS = [
+            { name: "HackerOne", rank: "Top 1%", points: "15000+", role: "Hacker" },
+            { name: "Bugcrowd", rank: "Top 50", points: "MVP", role: "Researcher" },
+            { name: "HackTheBox", rank: "Omniscient", points: "Guru", role: "CTF Player" },
+            { name: "TryHackMe", rank: "Top 1%", points: "God Mode", role: "Learner" },
+            { name: "PortSwigger", rank: "Certified", points: "Practitioner", role: "Analyst" },
+            ...Array.from({ length: 45 }, (_, i) => ({ name: `Platform ${i+6}`, rank: "Elite", points: "5000+", role: "User" }))
+        ];
+
+        const CERTS = [
+            { name: "OSCP", issuer: "OffSec", date: "2024" },
+            { name: "CISSP", issuer: "ISC2", date: "2023" },
+            { name: "CEH Master", issuer: "EC-Council", date: "2023" },
+            { name: "eWPTX", issuer: "eLearnSecurity", date: "2022" },
+            { name: "CRTP", issuer: "Altered Security", date: "2022" },
+            ...Array.from({ length: 40 }, (_, i) => ({ name: `Cert-${i+6}`, issuer: "CyberAuthority", date: "2021" }))
+        ];
+
+        // --- ACCESS LOGS DATA GENERATION (100 Items) ---
+        const EVENT_TYPES = [
+            "ROOT_ACCESS_GRANTED", "SQL_INJECTION_DETECTED", "SYSTEM_UPDATE_INIT", 
+            "BRUTE_FORCE_ATTEMPT", "DATA_EXFIL_TEST", "PORT_SCAN_DETECTED", 
+            "SSH_LOGIN_SUCCESS", "FIREWALL_RULE_UPDATE", "MALWARE_SIGNATURE_MATCH", 
+            "API_KEY_LEAK_DETECTED", "XSS_PAYLOAD_BLOCKED"
+        ];
+        const STATUSES = ["SUCCESS", "BLOCKED", "COMPLETE", "MITIGATED", "SIMULATED", "WARNING", "CRITICAL"];
+
+        // Generate 100 Logs sorted by time (newest first logic simulated)
+        const ACCESS_LOGS = Array.from({ length: 100 }, (_, i) => {
+            const h = Math.floor(Math.random() * 24).toString().padStart(2, '0');
+            const m = Math.floor(Math.random() * 60).toString().padStart(2, '0');
+            const s = Math.floor(Math.random() * 60).toString().padStart(2, '0');
+            return {
+                time: `${h}:${m}:${s}`,
+                event: EVENT_TYPES[Math.floor(Math.random() * EVENT_TYPES.length)],
+                ip: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+                status: STATUSES[Math.floor(Math.random() * STATUSES.length)]
+            };
+        }).sort((a, b) => b.time.localeCompare(a.time));
+
+        const ENCRYPTION_ALGOS = [
+            "Base64", "Hex", "Rot13", "Reverse", "Binary", "Caesar Cipher", "URL Encode", "HTML Entity", "MD5 (Hash)", "SHA-256 (Hash)", "AES-128 (Sim)", "AES-256 (Sim)", "RSA (Sim)"
+        ];
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initTypewriter();
+            renderMarquees();
+            renderPlatforms(false);
+            renderCerts();
+            renderLogs(); // Initial render
+            initEncryption();
+            renderBio();
+            renderWebPentestDetails();
+            
+            // Trigger initial nav state
+            updateNavHighlight();
+            
+            // Initialize Stats Animation
+            initStatsAnimation();
+        });
+
+        // --- STATS COUNTING ANIMATION ---
+        function initStatsAnimation() {
+            const stats = document.querySelectorAll('.stat-number');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Start Animation
+                        const target = parseInt(entry.target.getAttribute('data-target'));
+                        const suffix = entry.target.getAttribute('data-suffix') || '';
+                        animateValue(entry.target, 0, target, 2000, suffix);
+                    } else {
+                        // Reset Animation
+                        const suffix = entry.target.getAttribute('data-suffix') || '';
+                        entry.target.innerText = "0" + suffix;
+                    }
+                });
+            }, { threshold: 0.5 }); // Trigger when 50% visible
+
+            stats.forEach(stat => observer.observe(stat));
+        }
+
+        function animateValue(obj, start, end, duration, suffix) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.innerHTML = Math.floor(progress * (end - start) + start) + suffix;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // --- NAVIGATION & SCROLL ---
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+                closeMobileMenu();
+            }
+        }
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        function closeMobileMenu() {
+            document.getElementById('mobile-menu').classList.add('hidden');
+        }
+
+        // Scroll & Nav Highlight Logic
+        const sections = document.querySelectorAll("section");
+        const navBtns = document.querySelectorAll(".desktop-nav-btn");
+        const navMarker = document.getElementById("nav-marker");
+
+        function updateNavHighlight() {
+            // 1. Update Progress Bar
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress-bar').style.width = scrolled + "%";
+
+            // 2. Fade In Animations
+            document.querySelectorAll('.fade-in-section').forEach(el => {
+                if (el.getBoundingClientRect().top < window.innerHeight - 100) {
+                    el.classList.remove('opacity-0', 'translate-y-10', 'scale-95');
+                }
+            });
+
+            // 3. Active Section & Moving Line
+            let current = "";
+            
+            // Detect current section (with offset for header)
+            sections.forEach((section) => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                // 100px offset ensures we highlight a bit before reaching top
+                if (window.scrollY >= sectionTop - 150) {
+                    current = section.getAttribute("id");
+                }
+            });
+
+            // Handle case where we are at top but STATUS (first sec) might be small or we want default
+            if(window.scrollY < 200) current = "STATUS";
+
+            navBtns.forEach((btn) => {
+                // Reset color
+                btn.classList.remove("text-teal-400");
+                btn.classList.add("text-slate-400");
+
+                if (btn.getAttribute("data-target") === current) {
+                    // Set Active Color
+                    btn.classList.add("text-teal-400");
+                    btn.classList.remove("text-slate-400");
+
+                    // Move Marker
+                    if(navMarker && btn) {
+                        navMarker.style.width = `${btn.offsetWidth}px`;
+                        navMarker.style.left = `${btn.offsetLeft}px`;
+                        // Ensure opacity is 1
+                        navMarker.style.opacity = "1";
+                    }
+                }
+            });
+        }
+
+        // Attach listener
+        window.addEventListener("scroll", updateNavHighlight);
+        // Update on resize too (width changes)
+        window.addEventListener("resize", updateNavHighlight);
+
+
+        // --- TYPING EFFECT ---
+        let titleIndex = 0;
+        let charIndex = 0;
+        let isDeleting = false;
+        
+        function initTypewriter() {
+            const typeSpeed = isDeleting ? 50 : 100;
+            const currentTitle = TITLES[titleIndex];
+            const element = document.getElementById('typing-text');
+
+            if (!isDeleting && charIndex <= currentTitle.length) {
+                element.innerText = currentTitle.substring(0, charIndex);
+                charIndex++;
+            } else if (isDeleting && charIndex >= 0) {
+                element.innerText = currentTitle.substring(0, charIndex);
+                charIndex--;
+            }
+
+            if (charIndex === currentTitle.length + 1) {
+                isDeleting = true;
+                setTimeout(initTypewriter, 2000); // Pause at end
+                return;
+            }
+            
+            if (charIndex === 0 && isDeleting) {
+                isDeleting = false;
+                titleIndex = (titleIndex + 1) % TITLES.length;
+            }
+
+            setTimeout(initTypewriter, typeSpeed);
+        }
+
+        // --- RENDERING MARQUEES ---
+        function renderMarquees() {
+            // Tools (UPDATED DESIGN: Glassmorphism & Glow)
+            const toolsContainer = document.getElementById('tools-marquee');
+            const toolHTML = TOOLS.map(t => `
+                <div onclick="openAnalysisDeepDive('${t.name}', 'TOOL')" class="group w-64 h-24 bg-slate-900/50 backdrop-blur-md border border-slate-700/50 hover:border-teal-500 rounded-xl p-4 flex items-center gap-4 cursor-pointer transition-all duration-300 hover:scale-105 hover:bg-slate-800 hover:shadow-[0_0_25px_rgba(0,194,255,0.2)] shrink-0 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="text-3xl bg-slate-950 p-2 rounded-lg border border-slate-800 group-hover:border-teal-500/50 transition-colors z-10">${t.icon}</div>
+                    <div class="z-10 overflow-hidden">
+                        <div class="text-slate-200 font-bold text-sm truncate group-hover:text-teal-400 transition-colors">${t.name}</div>
+                        <div class="text-xs text-slate-500 truncate mt-1 group-hover:text-slate-400">Click for Deep Dive</div>
+                    </div>
+                </div>
+            `).join('');
+            toolsContainer.innerHTML = toolHTML + toolHTML; // Duplicate for infinite scroll
+
+            // Vulns (UPDATED DESIGN: Severity Highlight & Progress Bar)
+            const vulnsContainer = document.getElementById('vulns-marquee');
+            const vulnsHTML = VULNERABILITIES.map(v => `
+                <div onclick="openAnalysisDeepDive('${v.name}', 'VULNERABILITY')" class="group w-80 h-28 bg-slate-900/50 backdrop-blur-md border border-slate-700/50 hover:border-red-500 rounded-xl p-5 flex flex-col justify-center cursor-pointer transition-all duration-300 hover:scale-105 hover:bg-slate-800 hover:shadow-[0_0_25px_rgba(239,68,68,0.2)] shrink-0 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="flex justify-between items-center mb-2 z-10">
+                        <span class="text-slate-200 font-bold text-sm group-hover:text-white transition-colors">${v.name}</span>
+                        <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${v.severity === 'Critical' ? 'bg-red-500/20 text-red-400 border-red-500/30' : 'bg-orange-500/20 text-orange-400 border-orange-500/30'}">${v.severity}</span>
+                    </div>
+                    <div class="text-xs text-slate-500 truncate z-10 group-hover:text-slate-400">${v.details}</div>
+                    <div class="mt-3 w-full h-1 bg-slate-800 rounded-full overflow-hidden z-10">
+                        <div class="h-full bg-gradient-to-r ${v.severity === 'Critical' ? 'from-red-600 to-red-400' : 'from-orange-600 to-orange-400'} w-1/2 group-hover:w-full transition-all duration-700 ease-out"></div>
+                    </div>
+                </div>
+            `).join('');
+            vulnsContainer.innerHTML = vulnsHTML + vulnsHTML;
+
+            // Expertise (UPDATED DESIGN: Premium Tech Card with Animation)
+            const expContainer = document.getElementById('expertise-marquee');
+            const expHTML = EXPERTISE.map(e => `
+                <div onclick="openExpertiseModal('${e.name}')" class="group w-72 h-24 bg-slate-900/80 backdrop-blur-xl border border-slate-800 hover:border-teal-500/50 rounded-xl p-4 flex items-center justify-between cursor-pointer transition-all duration-500 hover:scale-105 hover:bg-slate-800 hover:shadow-[0_0_30px_rgba(0,194,255,0.15)] shrink-0 relative overflow-hidden">
+                     
+                     <!-- Hover Gradient Background -->
+                     <div class="absolute inset-0 bg-gradient-to-br from-teal-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
+                     
+                     <!-- Animated Corner Borders -->
+                     <div class="absolute top-0 right-0 w-0 h-[2px] bg-teal-400 group-hover:w-full transition-all duration-700"></div>
+                     <div class="absolute bottom-0 left-0 w-0 h-[2px] bg-purple-400 group-hover:w-full transition-all duration-700"></div>
+
+                     <div class="flex items-center gap-4 z-10">
+                        <div class="w-10 h-10 rounded-lg bg-slate-950 border border-slate-700 group-hover:border-teal-500/50 flex items-center justify-center transition-all duration-300 group-hover:rotate-12 shadow-lg">
+                            <i data-lucide="layers" class="w-5 h-5 text-slate-500 group-hover:text-teal-400 transition-colors"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-slate-300 font-bold text-sm group-hover:text-white transition-colors">${e.name}</h4>
+                            <p class="text-[10px] text-slate-500 group-hover:text-teal-400/70 font-mono mt-0.5">VERIFIED_SKILL</p>
+                        </div>
+                     </div>
+                     
+                     <div class="opacity-0 group-hover:opacity-100 transition-all duration-300 -translate-x-2 group-hover:translate-x-0 text-teal-400">
+                        <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                     </div>
+                </div>
+            `).join('');
+            expContainer.innerHTML = expHTML + expHTML;
+        }
+
+        // --- ANALYSIS MODAL (Standard) ---
+        function openAnalysisModal(title, desc, tag) {
+            document.getElementById('modal-title').innerText = title;
+            // Use innerHTML to support lists from Web Pentest details
+            document.getElementById('modal-desc').innerHTML = desc;
+            const tagEl = document.getElementById('modal-tag');
+            
+            if (tag) {
+                tagEl.classList.remove('hidden');
+                tagEl.innerText = tag;
+                tagEl.className = `px-2 py-1 rounded text-xs font-bold ${tag === 'Critical' ? 'bg-red-500/20 text-red-400' : 'bg-teal-500/20 text-teal-400'}`;
+            } else {
+                tagEl.classList.add('hidden');
+            }
+            
+            const modal = document.getElementById('analysis-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeAnalysisModal() {
+            const modal = document.getElementById('analysis-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // NEW FUNCTION FOR TOOLS & VULNS DEEP DIVE
+        function openAnalysisDeepDive(title, type) {
+            const modalTitle = document.getElementById('expertise-modal-title');
+            const modalContent = document.getElementById('expertise-modal-content');
+            
+            modalTitle.innerText = `${title} - ${type} ANALYSIS`;
+            
+            let html = '';
+            
+            if (type === 'TOOL') {
+                html += `<h2 class="text-3xl font-bold text-teal-400 mb-6">Advanced Tool Documentation: ${title}</h2>`;
+                const toolModules = ["Installation & Configuration", "Basic Usage Syntax", "Advanced Exploitation Modules", "Evasion & Obfuscation", "Scripting & Automation", "Integration with C2 Frameworks"];
+                
+                toolModules.forEach((mod, i) => {
+                    html += `<div class="mb-8">
+                        <h3 class="text-xl font-bold text-white mb-2">${i+1}. ${mod}</h3>
+                        <p class="text-slate-400 leading-relaxed mb-2">
+                            Utilizing <strong>${title}</strong> for ${mod.toLowerCase()} requires precision. We leverage custom configurations to bypass standard detection mechanisms. 
+                            The module allows for granular control over packet structures and timing, essential for stealthy operations in hardened environments.
+                        </p>
+                        <div class="bg-black p-4 rounded border border-slate-800 font-mono text-xs text-emerald-400">
+                            $ ${title.toLowerCase()} --module ${mod.split(' ')[0].toLowerCase()} --target 192.168.x.x --stealth-mode
+                        </div>
+                    </div>`;
+                });
+            } else {
+                // Vulnerability
+                html += `<h2 class="text-3xl font-bold text-red-400 mb-6">Vulnerability Deep Dive: ${title}</h2>`;
+                const vulnSections = ["Technical Description", "Attack Vectors", "Impact Analysis", "Proof of Concept (Simulated)", "Remediation Strategy", "CVSS Score Breakdown"];
+                
+                vulnSections.forEach((sec, i) => {
+                    html += `<div class="mb-8">
+                        <h3 class="text-xl font-bold text-white mb-2">${i+1}. ${sec}</h3>
+                        <p class="text-slate-400 leading-relaxed mb-2">
+                            In the context of <strong>${title}</strong>, the ${sec.toLowerCase()} phase involves rigorous analysis. 
+                            Attackers exploit this flaw by manipulating input vectors to trigger unintended behavior in the backend logic.
+                            Critical systems are often compromised due to lack of input sanitization or improper access controls associated with this vulnerability.
+                        </p>
+                         ${i === 3 ? `<div class="bg-black p-4 rounded border-l-4 border-red-500 font-mono text-xs text-slate-300">
+                            GET /api/v1/user?id=1 OR 1=1; -- <br>
+                            > HTTP/1.1 200 OK <br>
+                            > { "admin": true, "data": "SENSITIVE_LEAK" }
+                        </div>` : ''}
+                    </div>`;
+                });
+            }
+
+            html += `<div class="my-8 border-t border-slate-800 pt-8"><h3 class="text-slate-500 font-bold mb-4">REFERENCES & CVE DATABASE</h3></div>`;
+            for(let j=0; j<5; j++) {
+                 html += `<p class="text-slate-600 text-xs font-mono mb-1">REF_DOC_${5000+j}: ${title}_technical_paper_v${j}.pdf [AVAILABLE]</p>`;
+            }
+
+            modalContent.innerHTML = html;
+            toggleModal('expertise-large-modal');
+        }
+
+        // Special function for the Web Pentest Card - OPEN LARGE MODAL
+        function openWebPentestModal() {
+            toggleModal('web-pentest-modal');
+        }
+
+        // NEW FUNCTION FOR GENERIC EXPERTISE LARGE MODAL
+        function openExpertiseModal(title) {
+            const modalTitle = document.getElementById('expertise-modal-title');
+            const modalContent = document.getElementById('expertise-modal-content');
+            
+            modalTitle.innerText = `${title.toUpperCase()} - ADVANCED PROTOCOLS`;
+            
+            let html = `<h2 class="text-3xl font-bold text-purple-400 mb-6">Comprehensive Guide to ${title}</h2>`;
+            
+            // Simulated Chapters
+            const chapters = [
+                "Theoretical Foundations", "Architecture & Design Patterns", "Threat Modeling", 
+                "Exploitation Vectors", "Defense Mechanisms", "Advanced Tooling", 
+                "Case Studies & Forensics", "Compliance & Standards", "Future Trends", "Execution Strategy"
+            ];
+
+            chapters.forEach((chap, i) => {
+                html += `<div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-3">Module ${i+1}: ${chap}</h3>
+                    <p class="text-slate-400 leading-relaxed mb-4">
+                        In the context of <strong>${title}</strong>, mastering ${chap.toLowerCase()} is critical for ensuring robust security postures. 
+                        We explore the intricacies of how these systems interact with modern infrastructure. 
+                        The attack surface in this domain is constantly evolving, requiring a proactive approach to identify anomalies before they escalate.
+                    </p>
+                    <p class="text-slate-400 leading-relaxed">
+                        Advanced practitioners leverage custom scripts and automated frameworks to audit ${chap.toLowerCase()}. 
+                        However, manual verification remains the gold standard. 
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </p>
+                </div>`;
+            });
+            
+            html += `<div class="my-8 border-t border-slate-800 pt-8"><h3 class="text-teal-400 font-bold mb-4">EXTENDED ANALYSIS LOGS (SAMPLE DATA)</h3></div>`;
+            
+            for(let j=0; j<10; j++) {
+                 html += `<p class="text-slate-500 text-xs font-mono mb-2">Log Entry 0x${200+j}: Analyzing HTTP headers for security misconfigurations... [PASS]</p>`;
+                 html += `<p class="text-slate-500 text-xs font-mono mb-2">Log Entry 0x${300+j}: Fuzzing API endpoints for unhandled exceptions... [VULN_DETECTED]</p>`;
+            }
+
+            modalContent.innerHTML = html;
+            toggleModal('expertise-large-modal');
+        }
+
+        // Function to render huge text for web pentest
+        function renderWebPentestDetails() {
+            const container = document.getElementById('web-pentest-content');
+            let html = `<h2 class="text-3xl font-bold text-teal-400 mb-6">Advanced Web Application Penetration Testing Protocol</h2>`;
+            
+            const topics = [
+                "Reconnaissance & OSINT", "Scanning & Enumeration", "Authentication Flaws", 
+                "Authorization (IDOR/PrivEsc)", "Injection Attacks (SQLi/XSS)", "XML External Entities (XXE)",
+                "Insecure Deserialization", "Component Analysis", "API Security Testing", "Reporting & Remediation"
+            ];
+
+            topics.forEach((topic, i) => {
+                html += `<div class="mb-8">
+                    <h3 class="text-xl font-bold text-white mb-3">${i+1}. ${topic}</h3>
+                    <p class="text-slate-400 leading-relaxed mb-4">
+                        In the domain of ${topic}, a deep understanding of the underlying architectural patterns is paramount. 
+                        We begin by analyzing the attack surface, identifying potential entry points that deviate from standard security practices.
+                        Advanced techniques involve manual payload crafting to bypass WAFs and filters. 
+                        Securing modern web applications requires a holistic approach that transcends simple vulnerability scanning. 
+                        Our methodology integrates automated discovery with rigorous manual validation to uncover complex logical flaws often missed by tools.
+                    </p>
+                    <p class="text-slate-400 leading-relaxed">
+                        Furthermore, persistent testing of ${topic} often reveals subtle logic flaws. 
+                        By chaining vulnerabilities, we demonstrate critical impact. 
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    </p>
+                </div>`;
+            });
+            
+            html += `<div class="my-8 border-t border-slate-800 pt-8"><h3 class="text-teal-400 font-bold mb-4">EXTENDED ANALYSIS LOGS (SAMPLE DATA)</h3></div>`;
+            
+            for(let j=0; j<10; j++) {
+                 html += `<p class="text-slate-500 text-xs font-mono mb-2">Log Entry 0x${200+j}: Analyzing HTTP headers for security misconfigurations... [PASS]</p>`;
+                 html += `<p class="text-slate-500 text-xs font-mono mb-2">Log Entry 0x${300+j}: Fuzzing API endpoints for unhandled exceptions... [VULN_DETECTED]</p>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // --- ACCOMPLISH SECTION ---
+        let platformsExpanded = false;
+        function renderPlatforms(expanded) {
+            const grid = document.getElementById('platform-grid');
+            const items = expanded ? PLATFORMS : PLATFORMS.slice(0, 5);
+            
+            grid.innerHTML = items.map((p, idx) => {
+                const isMiddle = idx === 2 && !expanded;
+                return `
+                <div onclick="openAccomplishModal('${p.name}', '${p.rank}', '${p.points}', '${p.role}')" 
+                     class="relative bg-slate-800/90 backdrop-blur-sm rounded-xl p-6 border border-slate-700 flex flex-col items-center text-center transition-all duration-500 cursor-pointer group 
+                     hover:border-teal-400 hover:shadow-[0_0_30px_rgba(0,194,255,0.25)] hover:-translate-y-2 overflow-hidden
+                     ${isMiddle ? 'md:scale-110 md:z-10 shadow-2xl border-teal-500/50 bg-slate-800' : 'hover:scale-105'}">
+                     
+                     <!-- Hover Gradient Overlay -->
+                     <div class="absolute inset-0 bg-gradient-to-b from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                     
+                     <!-- Animated Icon Container -->
+                     <div class="relative z-10 w-14 h-14 bg-slate-950 rounded-2xl mb-4 flex items-center justify-center text-teal-500 border border-slate-800 group-hover:border-teal-500/50 group-hover:text-white group-hover:bg-teal-500 transition-all duration-500 shadow-lg group-hover:shadow-teal-500/40 group-hover:rotate-6">
+                        <i data-lucide="globe" class="w-7 h-7"></i>
+                     </div>
+                     
+                     <div class="relative z-10 w-full">
+                         <h3 class="font-bold text-white mb-1 text-lg group-hover:text-teal-300 transition-colors">${p.name}</h3>
+                         <p class="text-teal-400 text-xs font-bold mb-3 tracking-widest uppercase group-hover:text-teal-200 transition-colors">${p.rank}</p>
+                         
+                         <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-slate-600 to-transparent my-3 group-hover:via-teal-500/50 transition-colors"></div>
+                         
+                         <div class="flex justify-between w-full text-xs text-slate-400 font-mono">
+                            <span class="group-hover:text-slate-300 transition-colors">${p.role}</span>
+                            <span class="group-hover:text-emerald-300 transition-colors">${p.points} pts</span>
+                         </div>
+                     </div>
+                </div>
+            `}).join('');
+            lucide.createIcons();
+        }
+
+        function togglePlatforms() {
+            platformsExpanded = !platformsExpanded;
+            renderPlatforms(platformsExpanded);
+            document.getElementById('toggle-platforms-btn').innerText = platformsExpanded ? "COLLAPSE_DATA" : "LOAD_ALL_PLATFORMS [50+]";
+        }
+
+        // NEW FUNCTION FOR ACCOMPLISH MODAL
+        function openAccomplishModal(name, rank, points, role) {
+            const title = name.toUpperCase() + " ACHIEVEMENT";
+            // Create a search link based on the platform name (since we don't have exact URLs for all)
+            const link = `https://www.google.com/search?q=${name}+cybersecurity+platform`;
+            
+            const desc = `
+                <div class="space-y-6">
+                    <p class="text-slate-300 text-sm leading-relaxed">
+                        Detailed performance metrics and recognition earned on <strong>${name}</strong>. 
+                        Consistently demonstrating expertise through CTF challenges, bug bounties, and active community contributions.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-slate-950 p-4 rounded border border-slate-800">
+                            <span class="text-slate-500 block text-xs mb-1">CURRENT RANKING</span>
+                            <span class="text-teal-400 font-bold text-xl">${rank}</span>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded border border-slate-800">
+                            <span class="text-slate-500 block text-xs mb-1">TOTAL POINTS</span>
+                            <span class="text-emerald-400 font-bold text-xl">${points}</span>
+                        </div>
+                        <div class="bg-slate-950 p-4 rounded border border-slate-800 col-span-2 flex justify-between items-center">
+                            <div>
+                                <span class="text-slate-500 block text-xs mb-1">ROLE / BADGE</span>
+                                <span class="text-white font-mono font-bold">${role}</span>
+                            </div>
+                            <i data-lucide="award" class="text-yellow-500 w-8 h-8"></i>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <a href="${link}" target="_blank" class="flex items-center justify-center gap-2 w-full py-3 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-bold transition-all shadow-lg hover:shadow-teal-500/25 group">
+                            <i data-lucide="external-link" class="w-4 h-4 group-hover:rotate-45 transition-transform"></i> 
+                            VISIT PROFILE
+                        </a>
+                        <p class="text-center text-slate-600 text-xs mt-2">Redirects to external platform page</p>
+                    </div>
+                </div>
+            `;
+            
+            openAnalysisModal(title, desc, "VERIFIED");
+            // Re-render icons inside the modal content
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        // --- DOCUMENTS SECTION ---
+        function renderCerts() {
+            // Preview List (UPDATED: Interactive & Highlighted Cards)
+            const previewList = document.getElementById('cert-preview-list');
+            previewList.innerHTML = CERTS.slice(0, 5).map(c => `
+                <div onclick="openCertDeepDive('${c.name}', '${c.issuer}', '${c.date}')" 
+                     class="group relative bg-slate-800/50 p-5 rounded-xl border border-slate-700 cursor-pointer transition-all duration-300 
+                            hover:border-teal-400 hover:shadow-[0_0_20px_rgba(0,194,255,0.15)] hover:-translate-y-1 overflow-hidden">
+                     
+                     <!-- Hover Gradient -->
+                     <div class="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                     
+                     <div class="flex justify-between items-center relative z-10">
+                         <div class="flex items-center gap-4">
+                            <div class="p-2 bg-slate-900 rounded-lg border border-slate-700 group-hover:border-teal-500/50 group-hover:text-teal-400 text-slate-400 transition-colors">
+                                <i data-lucide="award" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-slate-200 group-hover:text-white text-lg transition-colors">${c.name}</h4>
+                                <p class="text-xs text-slate-500 group-hover:text-teal-400/80 transition-colors">${c.issuer}</p>
+                            </div>
+                         </div>
+                         <span class="text-xs font-mono bg-slate-950 border border-slate-800 px-3 py-1 rounded text-slate-400 group-hover:text-teal-400 group-hover:border-teal-500/30 transition-all">${c.date}</span>
+                     </div>
+                </div>
+            `).join('');
+
+            // Reports (UPDATED: Clickable Links)
+            const reportHTML = Array.from({length:10}).map((_,i) => `
+                 <a href="https://hackerone.com/" target="_blank" class="block bg-slate-800/50 p-4 rounded border border-slate-700/50 hover:bg-slate-800 hover:border-teal-500/50 transition-all cursor-pointer group">
+                     <div class="flex justify-between mb-2">
+                        <span class="text-teal-400 font-mono text-xs group-hover:text-teal-300 transition-colors">RPT-2024-${800+i}</span>
+                        <span class="text-xs text-slate-500 flex items-center gap-1 group-hover:text-white transition-colors">
+                            VIEW_REPORT <i data-lucide="external-link" class="w-3 h-3"></i>
+                        </span>
+                     </div>
+                     <h4 class="text-slate-200 font-bold mb-1 group-hover:text-teal-400 transition-colors">IDOR in User Authentication Flow</h4>
+                     <p class="text-xs text-slate-500 line-clamp-2 group-hover:text-slate-400">Discovered insecure direct object reference allowing unauthorized access to admin panels.</p>
+                </a>
+            `).join('');
+            document.getElementById('reports-list').innerHTML = reportHTML;
+            document.getElementById('reports-list-dup').innerHTML = reportHTML;
+
+            // All Certs Modal
+            document.getElementById('all-certs-grid').innerHTML = CERTS.map(c => `
+                <div class="bg-slate-800 p-4 rounded border border-slate-700 hover:border-teal-400">
+                    <h4 class="font-bold text-teal-400">${c.name}</h4>
+                    <p class="text-sm text-slate-400">${c.issuer}</p>
+                    <p class="text-xs text-slate-600 mt-2">${c.date}</p>
+                </div>
+            `).join('');
+
+            // Re-render icons for the new content
+            lucide.createIcons();
+        }
+
+        // NEW FUNCTION FOR CERT DEEP DIVE
+        function openCertDeepDive(name, issuer, date) {
+            const title = `CERTIFICATION: ${name}`;
+            const desc = `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 mb-4 p-4 bg-slate-950 rounded-lg border border-slate-800">
+                        <i data-lucide="check-circle" class="text-teal-400 w-8 h-8"></i>
+                        <div>
+                            <p class="text-sm text-slate-400">ISSUED BY</p>
+                            <p class="text-white font-bold text-lg">${issuer}</p>
+                        </div>
+                        <div class="ml-auto text-right">
+                            <p class="text-sm text-slate-400">YEAR</p>
+                            <p class="text-white font-mono">${date}</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-slate-300 leading-relaxed">
+                        This certification validates advanced proficiency in cybersecurity methodologies. 
+                        The curriculum covers rigorous practical assessments, requiring hands-on exploitation 
+                        of vulnerabilities in controlled environments. Achieving <strong>${name}</strong> 
+                        demonstrates a commitment to professional excellence and technical mastery.
+                    </p>
+
+                    <h4 class="text-teal-400 font-bold text-sm mt-4 mb-2">KEY VALIDATED SKILLS:</h4>
+                    <ul class="grid grid-cols-2 gap-2 text-xs text-slate-400">
+                        <li class="flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3 text-teal-500"></i> Network Security</li>
+                        <li class="flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3 text-teal-500"></i> Vulnerability Analysis</li>
+                        <li class="flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3 text-teal-500"></i> Exploitation Frameworks</li>
+                        <li class="flex items-center gap-2"><i data-lucide="chevron-right" class="w-3 h-3 text-teal-500"></i> Report Writing</li>
+                    </ul>
+                </div>
+            `;
+            
+            openAnalysisModal(title, desc, "VERIFIED CREDENTIAL");
+            setTimeout(() => lucide.createIcons(), 50);
+        }
+
+        // --- ACCESS LOGS PAGINATION ---
+        let currentLogPage = 1;
+        const LOGS_PER_PAGE = 7;
+
+        function renderLogs() {
+            const container = document.getElementById('access-logs-container');
+            
+            // Calculate slice range
+            const start = (currentLogPage - 1) * LOGS_PER_PAGE;
+            const end = start + LOGS_PER_PAGE;
+            const logsToShow = ACCESS_LOGS.slice(start, end);
+            
+            container.innerHTML = logsToShow.map(log => {
+                let statusColor = 'text-gray-400';
+                if (log.status === 'SUCCESS' || log.status === 'COMPLETE') statusColor = 'text-emerald-400';
+                else if (log.status === 'BLOCKED' || log.status === 'MITIGATED') statusColor = 'text-teal-400';
+                else if (log.status === 'CRITICAL' || log.status === 'WARNING') statusColor = 'text-red-400';
+                else if (log.status === 'SIMULATED') statusColor = 'text-yellow-400';
+
+                return `
+                <div class="relative px-4 py-3 flex gap-4 transition-all duration-300 group border-l-2 border-transparent hover:border-teal-400 hover:bg-slate-800/60 hover:shadow-[inset_0_0_20px_rgba(0,194,255,0.05)] cursor-crosshair animate-fade-in overflow-hidden">
+                   
+                   <!-- Hover Gradient Overlay -->
+                   <div class="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+
+                   <div class="w-24 text-slate-500 font-mono text-xs pt-1 group-hover:text-teal-500/80 transition-colors relative z-10">${log.time}</div>
+                   <div class="flex-1 text-slate-300 group-hover:text-white transition-colors font-bold text-xs pt-1 relative z-10">${log.event}</div>
+                   <div class="w-32 hidden md:block text-slate-500 font-mono text-xs pt-1 relative z-10">${log.ip}</div>
+                   <div class="w-24 font-bold text-xs pt-1 ${statusColor} relative z-10 group-hover:brightness-125 transition-all">[${log.status}]</div>
+                </div>
+            `}).join('');
+
+            // Update Buttons
+            const totalPages = Math.ceil(ACCESS_LOGS.length / LOGS_PER_PAGE);
+            const btnPrev = document.getElementById('btn-prev-log');
+            const btnNext = document.getElementById('btn-next-log');
+            const pageIndicator = document.getElementById('log-page-indicator');
+
+            btnPrev.disabled = currentLogPage === 1;
+            btnNext.disabled = currentLogPage === totalPages;
+            
+            pageIndicator.innerText = `PAGE ${currentLogPage} / ${totalPages}`;
+            
+            // Simple fade animation class
+            container.classList.remove('opacity-0');
+            void container.offsetWidth; // trigger reflow
+            container.classList.add('opacity-100');
+        }
+
+        function changeLogPage(direction) {
+            const totalPages = Math.ceil(ACCESS_LOGS.length / LOGS_PER_PAGE);
+            const newPage = currentLogPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentLogPage = newPage;
+                renderLogs();
+            }
+        }
+
+        // --- ENCRYPTION ---
+        let encryptMode = 'ENCRYPT';
+
+        function initEncryption() {
+            const select = document.getElementById('algo-select');
+            ENCRYPTION_ALGOS.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a;
+                opt.innerText = a;
+                select.appendChild(opt);
+            });
+        }
+
+        function setEncryptionMode(mode) {
+            encryptMode = mode;
+            const btnEnc = document.getElementById('btn-encrypt');
+            const btnDec = document.getElementById('btn-decrypt');
+            
+            if(mode === 'ENCRYPT') {
+                btnEnc.classList.add('bg-teal-600', 'text-white', 'shadow-lg');
+                btnEnc.classList.remove('text-slate-500');
+                btnDec.classList.remove('bg-teal-600', 'text-white', 'shadow-lg');
+                btnDec.classList.add('text-slate-500');
+            } else {
+                btnDec.classList.add('bg-teal-600', 'text-white', 'shadow-lg');
+                btnDec.classList.remove('text-slate-500');
+                btnEnc.classList.remove('bg-teal-600', 'text-white', 'shadow-lg');
+                btnEnc.classList.add('text-slate-500');
+            }
+            processEncryption();
+        }
+
+        function processEncryption() {
+            const input = document.getElementById('input-text').value;
+            const algo = document.getElementById('algo-select').value;
+            const outputEl = document.getElementById('output-text');
+            const indicator = document.getElementById('output-indicator');
+            const aesContainer = document.getElementById('aes-strength-container');
+
+            if(input.length > 0) {
+                indicator.classList.remove('opacity-0');
+            } else {
+                indicator.classList.add('opacity-0');
+                outputEl.innerHTML = '<span class="text-slate-800">Waiting for input...</span>';
+                aesContainer.classList.add('hidden');
+                return;
+            }
+
+            // Key strength simulation for AES
+            if (algo.includes('AES')) {
+                aesContainer.classList.remove('hidden');
+                const strength = Math.min(100, input.length * 5);
+                const bar = document.getElementById('aes-bar');
+                bar.style.width = strength + '%';
+                bar.className = `h-full transition-all duration-500 ${strength < 30 ? 'bg-red-500' : strength < 70 ? 'bg-yellow-500' : 'bg-emerald-500'}`;
+                document.getElementById('aes-text').innerText = strength + '% (Simulated)';
+            } else {
+                aesContainer.classList.add('hidden');
+            }
+
+            let res = '';
+            try {
+                if (algo === 'Base64') {
+                    res = encryptMode === 'ENCRYPT' ? btoa(input) : atob(input);
+                } else if (algo === 'Rot13') {
+                    res = input.replace(/[a-zA-Z]/g, (c) => {
+                        const base = c <= 'Z' ? 65 : 97;
+                        return String.fromCharCode(base + (c.charCodeAt(0) - base + 13) % 26);
+                    });
+                } else if (algo === 'Reverse') {
+                     res = input.split('').reverse().join('');
+                } else {
+                     res = encryptMode === 'ENCRYPT' 
+                     ? `[${algo}_ENCRYPTED]::${btoa(input).substring(0, 10)}...` 
+                     : `[${algo}_DECRYPTED_SIM]::${input}`;
+                }
+            } catch (e) {
+                res = "ERROR: Invalid Input for this Algorithm";
+            }
+
+            outputEl.innerText = res;
+        }
+
+        function copyOutput() {
+            const text = document.getElementById('output-text').innerText;
+            navigator.clipboard.writeText(text);
+        }
+
+        // --- BIO GENERATION ---
+        function renderBio() {
+            const container = document.getElementById('bio-text-content');
+            let html = '';
+            for(let i=0; i<20; i++) {
+                const chapter = ['ORIGIN', 'AWAKENING', 'FIRST_SHELL', 'THE_NETWORK', 'ZERO_DAY'][i % 5];
+                html += `
+                <div class="mb-8">
+                    <h4 class="text-white font-bold mb-2">CHAPTER ${i+1}: ${chapter}</h4>
+                    <p>
+                      In the expansive digital frontier, security is not a product but a process. My journey began analyzing packet dumps in a dimly lit room... 
+                      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    </p>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // --- GENERAL MODALS ---
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            const content = modal.querySelector('div'); // inner content container
+            
+            if (modal.classList.contains('hidden')) {
+                // Open
+                modal.classList.remove('hidden');
+                // small delay to allow display:block to apply before opacity transition
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }, 10);
+            } else {
+                // Close
+                modal.classList.add('opacity-0');
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // --- RESUME DOWNLOAD FUNCTION ---
+        function downloadResume() {
+            const resumeContent = `
+ASANUL HOQUE ESAN
+Cybersecurity Professional | Pentester | Security Researcher
+
+CONTACT
+--------------------------------------------------
+Email: secure@nulllynx.com
+Phone: +1 (555) 010-9999
+LinkedIn: linkedin.com/in/asanul-hoque-esan
+GitHub: github.com/nulllynx
+
+SUMMARY
+--------------------------------------------------
+Dedicated Cybersecurity Professional specializing in Penetration Testing and Vulnerability Assessment. 
+With a hacker mindset and corporate discipline, I bridge the gap between critical infrastructure flaws 
+and robust security postures.
+
+EXPERIENCE
+--------------------------------------------------
+Security Researcher | NullLynx (2020 - Present)
+- Conducted comprehensive penetration tests for 40+ clients.
+- Discovered and reported over 350 vulnerabilities.
+- Specialized in Web Application Security and Network Pentesting.
+
+Bug Bounty Hunter | HackerOne & Bugcrowd
+- Recognized in Hall of Fame for multiple programs.
+- Secured Top 1% ranking on major platforms.
+
+SKILLS
+--------------------------------------------------
+- Web Penetration Testing (OWASP Top 10)
+- Network Security & Infrastructure Auditing
+- Vulnerability Assessment & Management
+- Tools: Burp Suite, Metasploit, Nmap, Wireshark, Python
+
+CERTIFICATIONS
+--------------------------------------------------
+- OSCP (OffSec Certified Professional) - 2024
+- CISSP (Certified Information Systems Security Professional) - 2023
+- CEH Master (Certified Ethical Hacker) - 2023
+
+(This is a demo resume generated by the portfolio website)
+            `;
+            
+            const blob = new Blob([resumeContent], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'Asanul_Hoque_Esan_Resume_Demo.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+    </script>
 </body>
 </html>
-
